@@ -82,12 +82,8 @@ Regions where $K$ assigns zero probability are *structural*, not violations.
 
 Define a local risk field:
 
-$$
-\lambda(s)
-=
-\lim_{\Delta t \to 0}
-\frac{P(T \in [t, t+\Delta t) \mid S_t = s)}{\Delta t}
-$$
+$$ \lambda(s) = \lim_{\Delta t \to 0} \frac{P(T \in [t, t+\Delta t) \mid S_t = s)}{\Delta t} $$
+
 
 This is estimable using standard survival models.
 
