@@ -1,4 +1,4 @@
-# Beyond Causal Inference?
+<img width="1539" height="542" alt="image" src="https://github.com/user-attachments/assets/75c5cda5-9f17-46c9-95df-a1c44f655a95" /># Beyond Causal Inference?
 ## A Field-Based, Dynamical Framework for Real-World Epidemiology
 
 > **Core message**  
@@ -171,7 +171,6 @@ $$
 \frac{\partial \Phi}{\partial a}
 \right]
 $$
-
 
 
 This is the **risk-gradient field**.
