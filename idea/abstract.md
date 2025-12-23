@@ -206,10 +206,7 @@ $$
 Therefore:
 
 $$
-\Phi(x,0) - \Phi(x,1)
-\approx
--
-\frac{\partial \Phi}{\partial a}
+\Phi(x,0) - \Phi(x,1) \approx - \frac{\partial \Phi}{\partial a}
 $$
 
 Averaging over $X$ yields:
