@@ -1,0 +1,530 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  11pt,
+]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{setspace}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else  
+    % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+% definitions for citeproc citations
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\begin{list}{}{%
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-1\cslhangindent}
+  \fi
+  % set entry spacing
+  \setlength{\itemsep}{#2\baselineskip}}}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+
+\usepackage{bookmark}
+
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Epidynamix: From Force to Field in Real-World Epidemiology},
+  pdfauthor={Jinseob Kim},
+  pdfkeywords={causal inference, real-world data, positivity
+violation, treatment effect heterogeneity, risk potential field},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+
+\title{Epidynamix: From Force to Field in Real-World Epidemiology}
+\author{Jinseob Kim}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+Standard causal inference methods estimate average treatment effects
+(ATE) under positivity and no unmeasured confounding assumptions. In
+real-world data (RWD), structural positivity violations arise from
+clinical guidelines and contraindications, while treatment effects are
+often heterogeneous across patient states. We propose Epidynamix, a
+framework that models health states as points within a Risk Potential
+Field \(\Phi(s) = -\log\lambda(s)\), where treatment effects become
+directional gradients and positivity violations define structural
+boundaries. Through simulation, we show that while ATE-based methods
+(Cox regression, IPTW) collapse effect heterogeneity into scalar
+summaries, the field-based approach preserves clinically meaningful
+variation (\textasciitilde4-fold across state space). This geometric
+perspective offers a complementary lens for RWD analysis, particularly
+when the standard causal question is structurally unanswerable.
+\end{abstract}
+
+
+\setstretch{1.5}
+\section{Introduction}\label{introduction}
+
+For decades, causal inference in epidemiology has operated under a
+``Newtonian'' abstraction: treatment \(A\) exerts a force on outcome
+\(Y\), producing an Average Treatment Effect (ATE) that we estimate as
+if it were a universal constant.
+
+This framework assumes: (1) interventions are external forces applied to
+passive subjects; (2) positivity violations are statistical nuisances to
+be trimmed; and (3) a single scalar (ATE or Hazard Ratio) captures the
+truth of treatment impact.
+
+\textbf{Why now?} The explosion of Real-World Data (RWD)---electronic
+health records, claims databases, registries---has exposed the
+limitations of this paradigm. Unlike curated trial populations, RWD
+reflects the full complexity of clinical practice: treatment decisions
+are constrained by guidelines, contraindications create structural zeros
+in the propensity score, and effects vary systematically across patient
+states. We increasingly face situations where:
+
+\begin{itemize}
+\tightlist
+\item
+  Treatment is mandated for high-risk patients (structural positivity
+  violation)
+\item
+  The ``same'' intervention varies by context, timing, and patient state
+\item
+  Treatment decisions are entangled with prognosis (confounding by
+  indication)
+\end{itemize}
+
+Traditional methods respond by restricting analysis to ``overlap
+regions'' or trimming extreme weights---effectively discarding the very
+patients for whom treatment decisions matter most (Petersen et al.
+2012).
+
+We propose an alternative: \textbf{a map, not a number.}
+
+\section{The Geometric Turn: From Force to
+Field}\label{the-geometric-turn-from-force-to-field}
+
+We propose a fundamental shift: \textbf{Causal effects are not primitive
+forces; they are movements within a structured Field.} We call this
+framework Epidynamix.
+
+\subsection{The Risk Potential Field}\label{the-risk-potential-field}
+
+We define a scalar field over the state space \(\mathcal{S}\) of all
+possible patient conditions, called the Risk Potential:
+
+\[
+\Phi(s) = -\log(\lambda(s))
+\]
+
+where \(\lambda(s)\) is the instantaneous hazard at state \(s\). In this
+field, ``safety'' is high ground (peaks), and ``danger'' is low ground
+(valleys).
+
+\subsection{Intervention as
+State-Transition}\label{intervention-as-state-transition}
+
+An intervention is not a force applied to a static object. It is an
+operator \(\mathcal{I}_a\) that moves a patient from one coordinate in
+state space to another. For binary treatment, the effect is:
+
+\[
+\delta_A \Phi(x) = \Phi(x, A=1) - \Phi(x, A=0)
+\]
+
+The ATE is simply the population average of this local effect:
+
+\[
+\text{ATE} = \mathbb{E}_X[\delta_A \Phi(X)]
+\]
+
+This average is information-preserving only when
+\(\text{Var}_X[\delta_A \Phi] \approx 0\). When effects vary across
+patient states, the ATE collapses a rich distribution into a single
+number.
+
+\section{Positivity Violations as Structural
+Boundaries}\label{positivity-violations-as-structural-boundaries}
+
+In standard causal inference, if a subgroup always receives treatment
+(\(P(A=1|X) = 1\)), we call it a positivity violation---a statistical
+problem to fix.
+
+In the Epidynamix framework, this is a \textbf{Structural Cliff}: a
+boundary where the untreated state is forbidden by ethics, guidelines,
+or biological reality. Rather than treating these as estimation
+failures, we map them as the defining edges of the clinical landscape.
+
+\section{Simulation Study}\label{simulation-study}
+
+To demonstrate the Field approach, we simulated a clinical scenario with
+a structural boundary and heterogeneous effects.
+
+\textbf{Setup:}
+
+\begin{itemize}
+\tightlist
+\item
+  \(X_1\): Systolic blood pressure (100--200 mmHg)
+\item
+  \(X_2\): Inflammatory marker (0--10 mg/L)
+\item
+  \(A\): Antihypertensive treatment (binary)
+\item
+  Structural constraint: If \(X_1 > 160\), then \(A = 1\) (mandatory per
+  guideline)
+\end{itemize}
+
+Treatment benefit was designed to increase with \(X_1\).
+
+\textbf{Results (N = 3,000):}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.5000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Method
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Output
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Interpretation
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Cox HR & 0.55 & Treatment reduces hazard by 45\% \\
+IPTW ATE & 0.20 & Treatment increases 1-year survival by 20 percentage
+points \\
+Field \(\delta_A \Phi\) & 0.42--1.66 & Effect varies 4-fold across state
+space \\
+\end{longtable}
+
+Traditional methods produce single numbers. The Field approach reveals
+that treatment benefit varies \textasciitilde4-fold across the state
+space, with the largest effects in high-BP patients---precisely those
+for whom the guideline mandates treatment (Cole and Hernán 2008). The
+region \(X_1 > 160\) is not a failure; it is a Structural Cliff
+revealing clinical logic.
+
+\begin{figure}
+
+\centering{
+
+\includegraphics[width=0.9\linewidth,height=\textheight,keepaspectratio]{fig_field_approach.png}
+
+}
+
+\caption{\label{fig-field}Treatment effect field showing heterogeneity
+and structural boundary at \(X_1 > 160\). Gray region indicates
+positivity violation where comparison is structurally impossible.}
+
+\end{figure}%
+
+\section{Relation to Existing
+Approaches}\label{relation-to-existing-approaches}
+
+\subsection{Differentiation from CATE}\label{differentiation-from-cate}
+
+Conditional Average Treatment Effect (CATE) estimation---via causal
+forests (Wager and Athey 2018), meta-learners, or Bayesian
+methods---also addresses heterogeneity. The difference lies in the
+question asked:
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3077}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2308}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4615}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Aspect
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+CATE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Epidynamix
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Question & What is the effect for subgroup \(X=x\)? & What is the
+structure of the risk landscape? \\
+Positivity & Estimation problem & Structural information \\
+Counterfactuals & Required & Not required in boundary regions \\
+Output & \(\tau(x)\) & \(\Phi(s)\), gradients, boundaries \\
+\end{longtable}
+
+CATE asks ``what is the effect?''---conditional on covariates.
+Epidynamix asks ``what does the landscape look like, and where can we
+not go?'' Crucially, CATE treats positivity violations as missing data;
+Epidynamix reports boundaries explicitly as part of the result.
+
+\subsection{Connection to Structural Nested
+Models}\label{connection-to-structural-nested-models}
+
+The local effect \(\delta_A \Phi(x)\) shares conceptual ground with the
+``blip function'' in Structural Nested Mean Models (SNMM) (Robins 1994),
+which also models treatment effects as functions of patient state. The
+key difference is interpretive: SNMM aims to estimate causal effects
+under sequential exchangeability, while Epidynamix treats the effect
+surface as a geometric object to be mapped, with boundaries as
+informative features rather than obstacles.
+
+\subsection{Novelty Claim}\label{novelty-claim}
+
+We do not claim to invent new mathematics. Potential landscapes exist in
+physics and systems biology (e.g., Waddington's epigenetic landscape
+(Waddington 1957)). Our contribution is applying this lens to clinical
+RWD, where positivity violations are common, effects are entangled with
+state, and the average-effect question may be structurally unanswerable.
+
+This is a reinterpretation, not an invention---a new language for an old
+problem.
+
+\section{Discussion}\label{discussion}
+
+The Epidynamix framework offers a complementary perspective to standard
+causal inference (Rubin 1974; Hernán and Robins 2020). It does not
+replace existing methods; rather, it clarifies their domain of validity.
+
+\textbf{When ATE works:} If the risk field is smooth, low-curvature, and
+well-connected (positivity holds everywhere), the ATE is an accurate
+summary. Traditional methods excel here.
+
+\textbf{When ATE fails:} If effects are highly heterogeneous, or if
+structural constraints create disconnected regions (Petersen et al.
+2012), the ATE may be misleading or undefined. The field approach
+provides richer output---a map rather than a number.
+
+\textbf{Practical implications:}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Report effect heterogeneity alongside average effects
+\item
+  Visualize the treatment effect landscape when possible
+\item
+  Treat positivity violations as findings, not errors
+\item
+  Consider whether the causal question is answerable before estimating
+\end{enumerate}
+
+\textbf{Limitations:} The framework is conceptual; practical estimation
+of \(\Phi(s)\) requires flexible models and careful validation.
+Extension to time-varying treatments and high-dimensional states remains
+an open challenge.
+
+\section{Conclusion}\label{conclusion}
+
+Newtonian mechanics is not wrong---it is flat-space physics. Causal
+inference is not false---it is a low-curvature approximation.
+
+Real-world epidemiology, with its structural constraints and
+heterogeneous effects, may require a geometric view. The Epidynamix
+framework offers one such lens: treating causal effects not as forces,
+but as directional movements within a structured risk field.
+
+When the standard causal question cannot be answered, perhaps we should
+ask a different question.
+
+\section{References}\label{references}
+
+\phantomsection\label{refs}
+\begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-cole2008}
+Cole, Stephen R, and Miguel A Hernán. 2008. {``Constructing Inverse
+Probability Weights for Marginal Structural Models.''} \emph{American
+Journal of Epidemiology} 168 (6): 656--64.
+
+\bibitem[\citeproctext]{ref-hernan2020}
+Hernán, Miguel A, and James M Robins. 2020. \emph{Causal Inference: What
+If}. Boca Raton: Chapman \& Hall/CRC.
+
+\bibitem[\citeproctext]{ref-petersen2012}
+Petersen, Maya L, Kristin E Porter, Susan Comfort, Rachel
+Morello-Frosch, and Rose Ray. 2012. {``Diagnosing and Responding to
+Violations in the Positivity Assumption.''} \emph{Statistical Methods in
+Medical Research} 21 (1): 31--54.
+
+\bibitem[\citeproctext]{ref-robins1994}
+Robins, James M. 1994. {``Correcting for Non-Compliance in Randomized
+Trials Using Structural Nested Mean Models.''} \emph{Communications in
+Statistics-Theory and Methods} 23 (8): 2379--2412.
+
+\bibitem[\citeproctext]{ref-rubin1974}
+Rubin, Donald B. 1974. {``Estimating Causal Effects of Treatments in
+Randomized and Nonrandomized Studies.''} \emph{Journal of Educational
+Psychology} 66 (5): 688.
+
+\bibitem[\citeproctext]{ref-waddington1957}
+Waddington, Conrad Hal. 1957. \emph{The Strategy of the Genes: A
+Discussion of Some Aspects of Theoretical Biology}. London: George Allen
+\& Unwin.
+
+\bibitem[\citeproctext]{ref-wager2018}
+Wager, Stefan, and Susan Athey. 2018. {``Estimation and Inference of
+Heterogeneous Treatment Effects Using Causal Forests.''} \emph{Journal
+of the American Statistical Association} 113 (523): 1228--42.
+
+\end{CSLReferences}
+
+
+
+
+\end{document}

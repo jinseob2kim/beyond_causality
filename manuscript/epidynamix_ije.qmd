@@ -1,0 +1,227 @@
+---
+title: "Epidynamix: A Field-Based Framework for Real-World Epidemiology"
+subtitle: "Moving Beyond Average Treatment Effects"
+author:
+  - name: "Jinseob Kim"
+    affiliations:
+      - name: "Zarathu Co., Ltd."
+        city: "Seoul"
+        country: "Korea"
+    email: "jinseob2kim@gmail.com"
+    corresponding: true
+format:
+  html:
+    toc: true
+    number-sections: true
+  pdf:
+    documentclass: article
+    geometry: margin=1in
+    fontsize: 11pt
+    linestretch: 1.5
+bibliography: references.bib
+csl: international-journal-of-epidemiology.csl
+abstract: |
+  Modern causal inference in epidemiology relies on estimating average treatment
+  effects (ATE) under assumptions of well-defined interventions and positivity.
+  In real-world data (RWD), these assumptions frequently fail due to clinical
+  guidelines, contraindications, and structural constraints. We propose the
+  Epidynamix framework, which reinterprets causal effects not as forces acting
+  on outcomes, but as directional movements within a risk potential field.
+  Under this view, positivity violations are not estimation failures but
+  structural boundaries revealing the geometry of clinical practice. The ATE
+  becomes a first-order approximation of a richer landscape, valid only when
+  effect heterogeneity is negligible. Through simulation, we demonstrate how
+  traditional methods (Cox, IPTW) collapse structure into scalar summaries,
+  while the field-based approach preserves clinically meaningful variation.
+  This framework offers a complementary lens for RWD analysis where the
+  standard causal question may be structurally unanswerable.
+keywords:
+  - causal inference
+  - real-world data
+  - positivity violation
+  - treatment effect heterogeneity
+  - dynamical systems
+---
+
+## Introduction
+
+Causal inference in epidemiology typically asks: *What is the average effect of
+treatment A on outcome Y?* This question is formalized through potential outcomes
+$Y(1)$ and $Y(0)$, with the Average Treatment Effect defined as:
+
+$$
+\text{ATE} = \mathbb{E}[Y(1) - Y(0)]
+$$
+
+This framework has been remarkably successful in randomized trials. However, in
+real-world data (RWD), the system is high-dimensional, time-varying, and
+constrained by clinical guidelines. We increasingly encounter situations where:
+
+- Treatment is mandated for high-risk patients (positivity violation)
+- The "same" intervention varies by context, timing, and patient state
+- Treatment decisions are entangled with prognosis (confounding by indication)
+
+When positivity fails, standard approaches—trimming extreme propensity scores,
+restricting to overlap regions—treat this as an estimation problem to be fixed.
+We propose an alternative interpretation: **positivity violation is not a bug;
+it is a feature that reveals the structure of clinical practice.**
+
+
+## The Epidynamix Framework
+
+### From Force to Field
+
+Drawing an analogy from physics: Newton modeled gravity as a force acting between
+objects. Einstein reinterpreted gravity not as a force, but as curvature of
+spacetime—objects follow geodesics in a curved manifold.
+
+We propose a similar shift for epidemiology. Instead of modeling treatment as a
+"force" that causes outcomes:
+
+$$
+A \longrightarrow Y
+$$
+
+we view treatment as a **state transition operator** within a structured risk field:
+
+$$
+\mathcal{I}_a: s \mapsto s', \quad \Delta\Phi = \Phi(s') - \Phi(s)
+$$
+
+where $\Phi(s) = -\log \lambda(s)$ is the **risk potential**—higher $\Phi$ means
+lower instantaneous hazard, i.e., relative safety.
+
+
+### ATE as First-Order Approximation
+
+The treatment effect at state $s$ is the finite difference:
+
+$$
+\delta_A \Phi(x) = \Phi(x, 1) - \Phi(x, 0)
+$$
+
+The ATE is simply the average of this local effect:
+
+$$
+\text{ATE} = \mathbb{E}_X[\delta_A \Phi(X)]
+$$
+
+This average is **information-preserving** only when $\text{Var}_X[\delta_A \Phi] \approx 0$
+(homogeneous effects). When effects vary across patient states, the ATE collapses
+a rich distribution into a single number.
+
+
+### Positivity as Structural Geometry
+
+Standard positivity requires $0 < P(A=1 \mid X=x) < 1$ for all $x$. When this
+fails—say, when clinical guidelines mandate treatment above a threshold—we face
+a region where the counterfactual $Y(0)$ does not exist.
+
+In the field framework, this is not a statistical problem. It is a **structural
+boundary**: a "cliff" in the risk landscape where certain states are inaccessible.
+Rather than trimming data to force positivity, we map these boundaries as features
+of the system.
+
+
+## Illustrative Simulation
+
+We simulated a 2D state space with:
+
+- $X_1$: Systolic blood pressure (100–200 mmHg)
+- $X_2$: Inflammatory marker (0–10 mg/L)
+- $A$: Antihypertensive treatment (binary)
+- Structural constraint: If $X_1 > 160$, then $A = 1$ (mandatory per guideline)
+
+Treatment benefit was designed to increase with $X_1$ (heterogeneous effect).
+
+**Results (N = 3,000):**
+
+| Method | Output | Interpretation |
+|--------|--------|----------------|
+| Cox HR | 0.55 | "Treatment reduces hazard by 45%" |
+| IPTW ATE | 0.20 | "Treatment increases 1-year survival by 20%p" |
+| Field $\delta_A \Phi$ | 0.42 – 1.66 | Effect varies 4-fold across state space |
+
+Traditional methods produce single numbers. The field approach reveals that
+treatment benefit is **4-fold larger** for high-BP patients—precisely those
+for whom the guideline mandates treatment. The gray "no-comparison zone"
+($X_1 > 160$) is not a failure; it reflects clinical logic.
+
+![Treatment effect field showing heterogeneity and structural boundary at X1 > 160](../simulation/fig_field_approach.png){#fig-field width="100%"}
+
+
+## Relation to Existing Approaches
+
+### How is this different from CATE?
+
+Conditional Average Treatment Effect (CATE) estimation—via causal forests,
+meta-learners, or Bayesian methods—also addresses heterogeneity. The difference
+is in the **question asked**:
+
+| Aspect | CATE | Epidynamix |
+|--------|------|------------|
+| Question | "What is the effect for subgroup X=x?" | "What is the structure of the risk field?" |
+| Positivity | Estimation problem | Information |
+| Counterfactuals | Required | Not required |
+| Output | $\tau(x)$ (conditional effect) | $\Phi(s)$, gradients, boundaries |
+
+CATE asks "what is the effect?"—conditional on covariates. Epidynamix asks
+"what does the landscape look like, and where can we not go?"
+
+
+### Novelty Claim
+
+We do not claim to invent new mathematics. Potential landscapes exist in physics
+and systems biology (e.g., Waddington's epigenetic landscape). Our contribution
+is applying this lens to **clinical RWD**, where positivity violations are common,
+effects are entangled with state, and the average-effect question may be
+structurally unanswerable.
+
+This is a **reinterpretation**, not an invention—a new language for an old problem.
+
+
+## Discussion
+
+The Epidynamix framework offers a complementary perspective to standard causal
+inference. It does not replace existing methods; rather, it clarifies their
+domain of validity.
+
+**When ATE works:** If the risk field is smooth, low-curvature, and well-connected
+(positivity holds everywhere), the ATE is an accurate summary. Traditional methods
+excel here.
+
+**When ATE fails:** If effects are highly heterogeneous, or if structural constraints
+create disconnected regions, the ATE may be misleading or undefined. The field
+approach provides richer output—a map rather than a number.
+
+**Practical implications:**
+
+1. Report effect heterogeneity alongside average effects
+2. Visualize the treatment effect landscape when possible
+3. Treat positivity violations as findings, not errors
+4. Consider whether the causal question is answerable before estimating
+
+**Limitations:** The framework is conceptual; practical estimation of $\Phi(s)$
+requires flexible models (e.g., GAMs, neural networks) and careful validation.
+Extension to time-varying treatments and high-dimensional states remains an
+open challenge.
+
+
+## Conclusion
+
+Newtonian mechanics is not wrong—it is flat-space physics. Causal inference
+is not false—it is a low-curvature approximation.
+
+Real-world epidemiology, with its structural constraints and heterogeneous
+effects, may require a geometric view. The Epidynamix framework offers one
+such lens: treating causal effects not as forces, but as directional movements
+within a structured risk field.
+
+When the standard causal question cannot be answered, perhaps we should ask
+a different question.
+
+
+## References
+
+::: {#refs}
+:::

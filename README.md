@@ -1,4 +1,4 @@
-# beyond_causality
+# Epidynamix: The Physics of Epidemiology
 
 ## 인과추론 vs 장(Field) 중심 역학 — 존재론적 가정 비교
 

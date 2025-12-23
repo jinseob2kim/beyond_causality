@@ -1,0 +1,117 @@
+---
+title: "Epidynamix: From Force to Field in Real-World Epidemiology"
+subtitle: "A Commentary"
+author:
+  - name: Jinseob Kim
+    affiliations:
+      - name: Zarathu Co., Ltd.
+        city: Seoul
+        country: Korea
+    email: jinseob2kim@gmail.com
+    corresponding: true
+format:
+  html:
+    toc: true
+    number-sections: true
+  pdf:
+    documentclass: article
+    geometry: margin=1in
+    fontsize: 11pt
+    linestretch: 1.5
+bibliography: references.bib
+abstract: |
+  Current causal inference paradigms in epidemiology are largely "Newtonian," treating medical interventions as external forces acting on passive subjects to produce average outcomes. While successful in randomized trials, this abstraction falters in the complex terrain of Real-World Data (RWD), where clinical guidelines create structural positivity violations and effects are inherently heterogeneous. We propose **"Epidynamix,"** a framework that shifts the focus from "Force" to "Field." By viewing health states as points moving within a **Risk Potential Field ($\Phi$)**, we reinterpret causal effects as directional gradients and positivity violations as **"Structural Cliffs"**—boundaries of the clinical state space. Using a simulation of guideline-constrained treatment, we demonstrate that while standard scalar summaries (ATE) collapse essential structural information, the Epidynamix approach successfully maps the underlying geometry of risk and intervention benefit.
+---
+
+# Introduction: The Newtonian Delusion
+
+For decades, epidemiology has been captivated by a mechanical abstraction. We ask: *"What is the causal effect of treatment $A$ on outcome $Y$?"* We strive to estimate the Average Treatment Effect (ATE) as if it were a universal physical constant, much like a net force acting on a mass in Newtonian physics ($F=ma$). 
+
+This worldview assumes a "flat" universe where:
+1.  **Interventions are external forces:** Treatment is something applied *to* a subject, rather than an evolution of the system state.
+2.  **Overlap is a nuisance:** Positivity violations are treated as statistical failures ("missing data") to be trimmed or weighted away.
+3.  **Averages are truth:** A single scalar (ATE or Hazard Ratio) is assumed to capture the "truth" of the intervention's impact.
+
+While this works in the frictionless vacuum of a Randomized Controlled Trial (RCT), it breaks down in **Real-World Data (RWD)**. In RWD, the system is high-dimensional, time-varying, and—most importantly—constrained by human decision-making and biological necessity.
+
+# The Geometric Turn: From Force to Field
+
+We propose a fundamental shift in our worldview: **Causal effects are not primitive forces; they are movements within a structured Field.** We call this framework **Epidynamix**.
+
+## The Risk Potential Field ($\Phi$)
+We define a scalar field over the state space $\mathcal{S}$ of all possible patient conditions. We call this the **Risk Potential ($\Phi$)**:
+$$ \Phi(s) = -\log(\lambda(s)) $$
+where $\lambda(s)$ is the instantaneous hazard at state $s$. In this field, "safety" is high ground (peaks), and "danger" is low ground (valleys).
+
+## Intervention as a State-Transition Operator
+An intervention is not a force applied to a static object. Instead, it is an operator ($\mathcal{I}_a$) that moves a patient from one coordinate in the state space to another. The "effect" of the treatment is the difference in the local potential and its gradient at the new position:
+$$ \text{Effect} = \Phi(x, A=1) - \Phi(x, A=0) $$
+
+# Positivity Violations are Structural Cliffs
+
+In standard causal inference, if a certain subgroup (e.g., extremely high blood pressure) always receives treatment ($P(A=1|X) = 1$), we call it a **Positivity Violation**.
+
+In the Epidynamix framework, this is not a failure. It is a **Structural Cliff**. It represents a boundary in the clinical landscape where the "natural history" (untreated state) is forbidden by ethics, guidelines, or biological reality. We should not try to "fix" these cliffs; we should map them as the defining edges of the clinical world.
+
+# Simulation: Mapping the Gradient
+
+To demonstrate the Field approach, we simulated a clinical scenario with a structural boundary and heterogeneous effects (@fig-field).
+
+**Setup:**
+
+- $X_1$: Systolic blood pressure (100–200 mmHg)
+- $X_2$: Inflammatory marker (0–10 mg/L)
+- $A$: Antihypertensive treatment (binary)
+- Structural constraint: If $X_1 > 160$, then $A = 1$ (mandatory per guideline)
+
+Treatment benefit was designed to increase with $X_1$ (heterogeneous effect).
+
+**Results (N = 3,000):**
+
+| Method | Output | Interpretation |
+|--------|--------|----------------|
+| Cox HR | 0.55 | "Treatment reduces hazard by 45%" |
+| IPTW ATE | 0.20 | "Treatment increases 1-year survival by 20%p" |
+| Field $\delta_A \Phi$ | 0.42 – 1.66 | Effect varies 4-fold across state space |
+
+Traditional methods produce single numbers. The Field approach reveals that treatment benefit is **4-fold larger** for high-BP patients—precisely those for whom the guideline mandates treatment. The gray zone ($X_1 > 160$) is not a failure; it is a Structural Cliff.
+
+![Treatment effect field showing heterogeneity and structural boundary at X1 > 160](../simulation/fig_field_approach.png){#fig-field width="100%"}
+
+# What This Is Not: Differentiation from CATE
+
+Conditional Average Treatment Effect (CATE) estimation—via causal forests, meta-learners, or Bayesian methods—also addresses heterogeneity. The difference lies in the **question asked**:
+
+| Aspect | CATE | Epidynamix |
+|--------|------|------------|
+| Question | "What is the effect for subgroup X=x?" | "What is the structure of the risk landscape?" |
+| Positivity | Estimation problem to fix | Structural information to map |
+| Counterfactuals | Required | Not required in boundary regions |
+| Output | $\tau(x)$ (conditional effect) | $\Phi(s)$, gradients, and boundaries |
+
+CATE asks "what is the effect?"—conditional on covariates. Epidynamix asks "what does the landscape look like, and where can we not go?"
+
+We do not claim to invent new mathematics. Potential landscapes exist in physics and systems biology (e.g., Waddington's epigenetic landscape). Our contribution is applying this lens to **clinical RWD**, where positivity violations are common, effects are entangled with state, and the average-effect question may be structurally unanswerable.
+
+This is a **reinterpretation**, not an invention—a new language for an old problem.
+
+
+# Conclusion: Cartographers of Health
+
+The Epidynamix framework offers a complementary perspective to standard causal inference. It does not replace existing methods; rather, it clarifies their domain of validity.
+
+**When ATE works:** If the risk field is smooth, low-curvature, and well-connected (positivity holds everywhere), the ATE is an accurate summary.
+
+**When ATE fails:** If effects are highly heterogeneous, or if structural constraints create disconnected regions, the ATE may be misleading or undefined. The field approach provides richer output—a map rather than a number.
+
+**Practical implications:**
+
+1. Report effect heterogeneity alongside average effects
+2. Visualize the treatment effect landscape when possible
+3. Treat positivity violations as findings, not errors
+4. Consider whether the causal question is answerable before estimating
+
+Newtonian mechanics is not wrong—it is flat-space physics. Causal inference is not false—it is a low-curvature approximation. When the standard causal question cannot be answered, perhaps we should ask a different question.
+
+
+## References

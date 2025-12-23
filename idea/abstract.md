@@ -1,5 +1,10 @@
-# Beyond Causal Inference?
-## A Field-Based, Dynamical Framework for Real-World Epidemiology
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+# The Epidynamix Framework
+## A Field-Based, Dynamical Approach to Real-World Epidemiology
 
 > **Core message**  
 > Causal effects are not forces.  
@@ -54,6 +59,26 @@ We propose an analogous shift:
 
 ---
 
+## Notation
+
+Throughout this paper, we use the following conventions:
+
+| Symbol | Meaning |
+|--------|---------|
+| $S_t = (X_t, A_t)$ | System state at time $t$ |
+| $\mathcal{S}$ | State space |
+| $\lambda(s)$ | Instantaneous hazard at state $s$ |
+| $\Phi(s)$ | Risk potential function |
+| $\nabla \Phi$ | Gradient (for continuous variables) |
+| $\delta_A \Phi(x)$ | Finite difference for binary $A$: $\Phi(x,1) - \Phi(x,0)$ |
+| $K(s, s')$ | Transition kernel |
+| $\mathcal{I}_a$ | Intervention operator |
+
+**Note on binary treatment:**
+When $A \in \{0, 1\}$, expressions like $\partial \Phi / \partial a$ should be understood as the finite difference $\delta_A \Phi$, not a true derivative.
+
+---
+
 ## 3. State Space and Dynamics
 
 ### 3.1 State Definition
@@ -103,8 +128,25 @@ Interpretation:
 - low $\Phi$ → high risk
 - high $\Phi$ → relative stability
 
-$\Phi$ is not an outcome.  
+$\Phi$ is not an outcome.
 It is a **geometric property of the state space**.
+
+---
+
+### 4.3 Time Treatment
+
+**Simplifying assumption:** In this framework, we treat $\Phi(s)$ as either:
+
+1. **Landmark approach:** Evaluated at a fixed reference time $t^*$
+   $$\Phi(s) := \Phi(s; t^*)$$
+
+2. **Stationary assumption:** Time-invariant for a given state
+   $$\Phi(s) = \Phi(s) \quad \text{(no explicit } t \text{ dependence)}$$
+
+3. **Cumulative formulation:** Integrated over a horizon $[0, \tau]$
+   $$\Phi(s) = -\log \Lambda(s) = -\log \int_0^\tau \lambda(s, u) \, du$$
+
+For the toy examples in this paper, we adopt the **stationary assumption** for simplicity. Extension to fully time-varying fields is discussed in Section 12.
 
 ---
 
@@ -169,6 +211,10 @@ This **risk-gradient field** encodes:
 - directions of maximal risk increase
 - local instability structure of the system
 
+**Connection to Cox regression:** In the Cox model, $\log \lambda(s) = \log h_0(t) + \beta' s$.
+Since $\Phi = -\log \lambda$, we have $\nabla_x \Phi = -\beta$ (for continuous covariates,
+independent of baseline hazard $h_0$). The field framework generalizes this to nonlinear $\Phi(s)$.
+
 ---
 
 ### 7.2 Directional Effects as Local Geometry
@@ -204,7 +250,7 @@ They are **not global scalar quantities**.
 
 The true object is the field $\Phi(x,a)$.
 
-A first-order Taylor expansion in $a$ gives:
+**For continuous treatment**, a first-order Taylor expansion in $a$ gives:
 
 $$
 \Phi(x,1)
@@ -214,19 +260,22 @@ $$
 \frac{\partial \Phi(x,a)}{\partial a}\Big|_{a=0}
 $$
 
-Therefore:
+**For binary treatment** $A \in \{0,1\}$, this reduces to the finite difference
+(see Notation section):
 
 $$
-\Phi(x,0) - \Phi(x,1) \approx - \frac{\partial \Phi}{\partial a}
+\Phi(x,1) - \Phi(x,0) = \delta_A \Phi(x)
 $$
 
-Averaging over $X$ yields:
+Averaging over $X$ yields the ATE:
 
 $$
 \text{ATE}
-\;\approx\;
+=
 \mathbb{E}_X
-\left[\Phi(X,0) - \Phi(X,1)\right]
+\left[\Phi(X,1) - \Phi(X,0)\right]
+=
+\mathbb{E}_X[\delta_A \Phi(X)]
 $$
 
 **ATE is a first-order projection of a high-dimensional geometry.**
@@ -344,7 +393,103 @@ scalar causal summaries collapse complex geometry into unstable averages.
 
 ---
 
-### 10.6 Summary
+### 10.6 Mathematical Formalization: ATE as a Special Case
+
+**Theorem (Informal):** The Average Treatment Effect (ATE) is an
+information-preserving summary of the field $\Phi(x, a)$ when effect
+heterogeneity is negligible, i.e., $\text{Var}_X[\delta_A \Phi] \approx 0$.
+
+**Proof sketch:**
+
+**For binary treatment** $A \in \{0, 1\}$:
+
+The treatment effect is exactly the finite difference:
+
+$$
+\delta_A \Phi(x) = \Phi(x, 1) - \Phi(x, 0)
+$$
+
+No Taylor expansion is needed. "Curvature" in this context refers to
+**heterogeneity across $x$**, i.e., how much $\delta_A \Phi(x)$ varies with $x$.
+
+**For continuous/dose treatment** $A \in [0, 1]$:
+
+We can write the effect as an integral:
+
+$$
+\Phi(x, 1) - \Phi(x, 0) = \int_0^1 \frac{\partial \Phi}{\partial a}(x, a) \, da
+$$
+
+Or via second-order Taylor expansion around $a = 0$:
+
+$$
+\Phi(x, 1) \approx \Phi(x, 0) + \frac{\partial \Phi}{\partial a}\Big|_{a=0} + \frac{1}{2} \frac{\partial^2 \Phi}{\partial a^2}\Big|_{a=\xi}
+$$
+
+where $\xi \in (0, 1)$. The curvature term $\frac{\partial^2 \Phi}{\partial a^2}$
+captures dose-response nonlinearity.
+
+**Case 1: Homogeneous effects ($\text{Var}_X[\delta_A \Phi] \approx 0$)**
+
+For binary treatment, $\text{ATE} = \mathbb{E}_X[\delta_A \Phi(X)]$ holds by definition.
+The question is whether this average is **informative**.
+
+When $\delta_A \Phi(x) \approx c$ (constant across $x$):
+
+$$
+\text{ATE} \approx c
+$$
+
+ATE is a complete summary—no information is lost.
+
+For continuous treatment, this additionally requires low dose-response
+curvature ($\partial^2 \Phi / \partial a^2 \approx 0$).
+
+**Case 2: Heterogeneous effects ($\text{Var}_X[\delta_A \Phi]$ large)**
+
+ATE remains well-defined:
+
+$$
+\text{ATE} = \mathbb{E}_X[\delta_A \Phi(X)]
+$$
+
+But it collapses a distribution into a single number, losing information about:
+- Where effects are strong vs weak
+- Where effects are positive vs negative
+- Subpopulation-specific responses
+
+**Case 3: Positivity violation (structural discontinuity)**
+
+When $P(A = 0 \mid X = x) = 0$ for some $x$, the field $\Phi(x, 0)$ is
+**undefined or inaccessible** in that region.
+
+Attempting to compute:
+
+$$
+\text{ATE} = \mathbb{E}[\Phi(X, 0) - \Phi(X, 1)]
+$$
+
+involves integration over regions where $\Phi(x, 0)$ does not exist.
+This is not an estimation problem—it is a **domain problem**.
+
+One may redefine the estimand on the overlap region (where positivity holds);
+here we treat the full-population ATE as undefined to emphasize the structural constraint.
+
+The IPTW approach attempts to reweight observations to recover this
+quantity, but when $P(A = 0 \mid X) \to 0$, the weights $1/P(A \mid X) \to \infty$.
+
+**Conclusion:**
+
+- **ATE is valid** when $\Phi$ is smooth, low-curvature, and well-defined everywhere
+- **ATE is approximate** when heterogeneity exists but the field is connected
+- **ATE is undefined** when positivity fails (structural disconnection)
+
+MSMs and g-formula inherit these limitations because they ultimately
+estimate projections of the field onto the treatment axis.
+
+---
+
+### 10.7 Summary
 
 MSMs and the g-formula are not incorrect.
 They are coordinate-dependent summaries of an underlying risk field,
@@ -366,7 +511,40 @@ fail, and what structural information is discarded.
 
 ---
 
-## 12. Closing Perspective
+## 12. Relation to Existing Heterogeneity Research
+
+### 12.1 How is this different from CATE?
+
+Conditional Average Treatment Effect (CATE) estimation—via causal forests,
+meta-learners, or Bayesian approaches—also acknowledges effect heterogeneity.
+One might ask: *what does the Epidynamix framework add?*
+
+| Aspect | CATE / HTE Research | Epidynamix |
+|--------|---------------------|------------|
+| Core question | "What is the effect for subgroup $X=x$?" | "What is the structure of the risk field?" |
+| Output | $\tau(x) = \mathbb{E}[Y(1) - Y(0) \mid X=x]$ | $\Phi(s)$, $\nabla \Phi$, structural boundaries |
+| Positivity violation | Estimation problem (trim, extrapolate) | **Information** (map the boundary) |
+| Counterfactuals | Required | Not required |
+| Goal | Better effect estimation | Different question entirely |
+
+**Key distinction:** CATE still asks "what is the effect?"—just conditional on $X$.
+Epidynamix asks "what does the risk landscape look like, and where can we not go?"
+
+### 12.2 Novelty Claim
+
+We do not claim to invent new mathematics. Potential landscapes, dynamical systems,
+and information geometry exist in physics and theoretical biology.
+
+Our contribution is **applying this lens to clinical RWD**, where:
+- Positivity violations are common (guidelines, contraindications)
+- Treatment effects are entangled with state (confounding by indication)
+- The "average effect" question may be structurally unanswerable
+
+This is a **reinterpretation**, not an invention—a new language for an old problem.
+
+---
+
+## 13. Closing Perspective
 
 Newtonian mechanics is not wrong.  
 It is flat-space physics.
@@ -422,3 +600,57 @@ ATE ignores curvature encoded in $H_\Phi$.
 | Effect | Directional derivative |
 | ATE | First-order projection |
 | Violation | Structural geometry |
+
+---
+
+## A4. Toy Simulation: Traditional Methods vs Field-Based Approach
+
+### Setup
+
+We simulate a 2D state space with survival outcomes:
+- $X_1$: Systolic blood pressure (SBP, 100–200 mmHg)
+- $X_2$: Inflammatory marker (CRP, 0–10 mg/L)
+- $A$: Binary treatment (antihypertensive)
+- $T$: Survival time (exponentially distributed based on hazard)
+
+**Time treatment:** We adopt the **stationary assumption** (Section 4.3),
+treating $\Phi(s)$ as time-invariant for simplicity.
+
+**Structural constraint:** If $X_1 > 160$, then $A = 1$ (mandatory treatment per clinical guideline).
+
+**Heterogeneous effect:** Treatment benefit increases with $X_1$.
+
+**Connection to Cox model:** In the Cox framework, $\log \lambda(s) = \log h_0(t) + \beta' s$,
+so $\nabla_x \Phi = -\beta$ (independent of $h_0(t)$, for continuous covariates).
+Our GAM-based estimation generalizes this to nonlinear $\Phi(s)$.
+
+### Results (N = 3000)
+
+**Traditional Methods (Scalar Summaries):**
+
+| Method | Estimate | Interpretation |
+|--------|----------|----------------|
+| Cox HR | 0.55 | "Treatment reduces hazard by 45%" |
+| IPTW ATE | 0.20 | "Treatment increases 1-year survival by 20%p" |
+
+Both methods produce a single number summarizing "the effect."
+
+**Field-Based Approach:**
+
+| Output | Value | Interpretation |
+|--------|-------|----------------|
+| $\delta_A \Phi$ range | 0.42 – 1.66 | Effect varies 4-fold across state space |
+| Gradient direction | Increasing with $X_1$ | Higher BP → larger treatment benefit |
+| Structural boundary | $X_1 > 160$ (gray region) | Comparison impossible; all patients treated |
+
+### Key Message
+
+1. **Traditional methods are not wrong:** Cox and IPTW correctly estimate average effects.
+
+2. **But averages hide structure:** The single number (HR = 0.55) does not reveal that treatment benefit varies 4-fold depending on patient state.
+
+3. **Positivity violation is information:** The region $X_1 > 160$ is shown as a gray "no-comparison zone" in the field visualization. This is not a nuisance—it reflects the clinical guideline that mandates treatment for high-risk patients.
+
+4. **Field-based output is a map, not a number:** Instead of asking "what is the effect?", we ask "where is the effect strong, weak, or undefined?"
+
+See `simulation/fig_field_approach.png` for visualization.
