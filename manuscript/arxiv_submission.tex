@@ -130,6 +130,7 @@
 
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{hyperref}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -211,7 +212,7 @@ failures, but geometric features of the clinical landscape. Through
 simulation, we demonstrate that while standard methods (Cox regression,
 IPTW) collapse effect heterogeneity into scalar summaries, the
 field-based approach preserves clinically meaningful variation
-(\textasciitilde4-fold across state space) and explicitly maps regions
+(\textasciitilde3.5-fold across state space) and explicitly maps regions
 where comparison is structurally impossible. This geometric perspective
 offers a complementary lens for RWD analysis: \textbf{a map, not a
 number.}
@@ -377,19 +378,8 @@ In this framework, we treat \(\Phi(s)\) as either:
 For the examples in this paper, we adopt the \textbf{stationary
 assumption} for simplicity.
 
-\subsection{\texorpdfstring{\(\Phi\) as a Lyapunov-like
-Function}{\textbackslash Phi as a Lyapunov-like Function}}\label{phi-as-a-lyapunov-like-function}
-
-In many RWD systems, events occur preferentially along trajectories
-where:
-
-\[
-\mathbb{E}[\Phi(S_{t+1}) \mid S_t = s] \le \Phi(s)
-\]
-
-Thus, \(\Phi\) behaves as a \textbf{stochastic Lyapunov-like function}:
-not strictly decreasing, but directionally aligned with instability and
-event occurrence.
+In non-stationary hazard settings, consider landmark or time-specific
+fields, or a cumulative definition of risk potential over \([0, \tau]\).
 
 \section{Intervention as a Transition
 Operator}\label{intervention-as-a-transition-operator}
@@ -416,7 +406,9 @@ a \textbf{vector field}:
 \]
 
 This \textbf{risk-gradient field} encodes directions of maximal risk
-increase and local instability structure.
+increase and local instability structure. For binary treatment,
+interpret the treatment axis as finite differences \(\delta_A \Phi\)
+rather than a true derivative.
 
 \textbf{Connection to Cox regression:} In the Cox model,
 \(\log \lambda(s) = \log h_0(t) + \beta' s\). Since
@@ -467,6 +459,11 @@ Averaging over \(X\) yields the ATE:
 \]
 
 \textbf{ATE is a first-order projection of a high-dimensional geometry.}
+
+\textbf{Survival scale note:} For survival outcomes,
+\(\delta_A \Phi(x) = \Phi(x,1) - \Phi(x,0) = \log\{\lambda(x,0)/\lambda(x,1)\}\)
+is the negative log hazard ratio. The HR field is
+\(\exp\{-\delta_A \Phi(x)\}\).
 
 \textbf{Case 1: Homogeneous effects}
 (\(\text{Var}_X[\delta_A \Phi] \approx 0\))
@@ -542,6 +539,21 @@ We simulated a 2D state space with survival outcomes:
   Heterogeneous effect: Treatment benefit increases with \(X_1\)
 \end{itemize}
 
+\textbf{Estimation notes:} We enforce the structural rule
+\(X_1 > 160 \Rightarrow A = 1\) deterministically to induce a structural
+positivity boundary. We estimate the hazard surface \(\hat{\lambda}(s)\)
+using generalized additive models (GAMs) with tensor product smooths,
+fitting separate surfaces for \(A=0\) and \(A=1\). From these, we obtain
+\(\hat{\Phi}(s) = -\log \hat{\lambda}(s)\) and compute
+\(\delta_A \Phi(x) = \hat{\Phi}(x,1) - \hat{\Phi}(x,0)\). We report both
+\(\delta_A \Phi\) and the HR field \(\exp\{-\delta_A \Phi\}\).
+Visualization is restricted to regions with empirical support;
+disconnected regions (no joint support for both \(A=0\) and \(A=1\)) are
+rendered as boundaries where \(\delta_A \Phi\) is undefined. Alternative
+estimators (e.g., neural networks, random survival forests) could be
+substituted; the conceptual framework does not depend on a specific
+method.
+
 \textbf{Results (N = 3,000):}
 
 \begin{longtable}[]{@{}
@@ -563,12 +575,12 @@ Interpretation
 Cox HR & 0.55 & Treatment reduces hazard by 45\% \\
 IPTW ATE & 0.20 & Treatment increases 1-year survival by 20 percentage
 points \\
-Field \(\delta_A \Phi\) & 0.42--1.66 & Effect varies 4-fold across state
-space \\
+HR field \(\exp(-\delta_A \Phi)\) & 0.19--0.66 & Effect varies
+\textasciitilde3.5-fold across state space \\
 \end{longtable}
 
 Traditional methods produce single numbers. The Field approach reveals
-that treatment benefit varies \textasciitilde4-fold across the state
+that treatment benefit varies \textasciitilde3.5-fold across the state
 space, with the largest effects in high-BP patients---precisely those
 for whom the guideline mandates treatment.
 
@@ -595,8 +607,8 @@ positivity violation where comparison is structurally impossible.}
   Traditional methods are not wrong---Cox and IPTW correctly estimate
   average effects
 \item
-  But averages hide structure---HR = 0.55 does not reveal 4-fold
-  variation
+  But averages hide structure---HR = 0.55 does not reveal
+  \textasciitilde3.5-fold variation
 \item
   Positivity violation is information---the gray zone reflects clinical
   logic
@@ -694,6 +706,9 @@ map rather than a number.
   Treat positivity violations as findings, not errors
 \item
   Consider whether the causal question is answerable before estimating
+\item
+  Report HR field maps (\(\exp\{-\delta_A \Phi\}\)) alongside scalar
+  summaries
 \end{enumerate}
 
 \textbf{Limitations:} The framework is conceptual; practical estimation
@@ -728,15 +743,16 @@ Hernán, Miguel A, and James M Robins. 2020. \emph{Causal Inference: What
 If}. Boca Raton: Chapman \& Hall/CRC.
 
 \bibitem[\citeproctext]{ref-leizerman2025}
-Leizerman, Michael. 2025. {``Unified Causal Field Theory: A Mathematical
-Framework for Causal Inference.''} OSF Preprints.
-\url{https://doi.org/10.31219/osf.io/68805ae08cbd2c498f1f63d8}.
+Leizerman, Samuel L. 2025. {``Unified Causal Field Theory: A Proof of
+Geometric Subsumption and Extension of Causal Inference Methods into
+Unified Framework.''} SocArXiv.
+\url{https://doi.org/10.31235/osf.io/c7pz9}.
 
 \bibitem[\citeproctext]{ref-petersen2012}
-Petersen, Maya L, Kristin E Porter, Susan Comfort, Rachel
-Morello-Frosch, and Rose Ray. 2012. {``Diagnosing and Responding to
-Violations in the Positivity Assumption.''} \emph{Statistical Methods in
-Medical Research} 21 (1): 31--54.
+Petersen, Maya L, Kristin E Porter, Susan Gruber, Yue Wang, and Mark J
+van der Laan. 2012. {``Diagnosing and Responding to Violations in the
+Positivity Assumption.''} \emph{Statistical Methods in Medical Research}
+21 (1): 31--54. \url{https://doi.org/10.1177/0962280210386207}.
 
 \bibitem[\citeproctext]{ref-robins1994}
 Robins, James M. 1994. {``Correcting for Non-Compliance in Randomized
@@ -755,8 +771,9 @@ Discussion of Some Aspects of Theoretical Biology}. London: George Allen
 
 \bibitem[\citeproctext]{ref-wager2018}
 Wager, Stefan, and Susan Athey. 2018. {``Estimation and Inference of
-Heterogeneous Treatment Effects Using Causal Forests.''} \emph{Journal
+Heterogeneous Treatment Effects Using Random Forests.''} \emph{Journal
 of the American Statistical Association} 113 (523): 1228--42.
+\url{https://doi.org/10.1080/01621459.2017.1319839}.
 
 \end{CSLReferences}
 

@@ -18,6 +18,7 @@ format:
       text: |
         \usepackage{amsmath}
         \usepackage{amssymb}
+        \usepackage{hyperref}
 bibliography: references.bib
 keywords:
   - causal inference
@@ -26,7 +27,7 @@ keywords:
   - treatment effect heterogeneity
   - risk potential field
 abstract: |
-  Modern causal inference in epidemiology treats interventions as external forces acting on passive subjects to produce average outcomes—a "Newtonian" abstraction that works well in randomized trials but falters in Real-World Data (RWD). In RWD, clinical guidelines create structural positivity violations, treatment decisions are entangled with prognosis, and effects are inherently heterogeneous across patient states. We propose Epidynamix, a framework that shifts focus from "Force" to "Field." By viewing health states as points within a Risk Potential Field $\Phi(s) = -\log\lambda(s)$, we reinterpret causal effects as directional gradients, the ATE as a first-order projection, and positivity violations as structural boundaries—not estimation failures, but geometric features of the clinical landscape. Through simulation, we demonstrate that while standard methods (Cox regression, IPTW) collapse effect heterogeneity into scalar summaries, the field-based approach preserves clinically meaningful variation (~4-fold across state space) and explicitly maps regions where comparison is structurally impossible. This geometric perspective offers a complementary lens for RWD analysis: **a map, not a number.**
+  Modern causal inference in epidemiology treats interventions as external forces acting on passive subjects to produce average outcomes—a "Newtonian" abstraction that works well in randomized trials but falters in Real-World Data (RWD). In RWD, clinical guidelines create structural positivity violations, treatment decisions are entangled with prognosis, and effects are inherently heterogeneous across patient states. We propose Epidynamix, a framework that shifts focus from "Force" to "Field." By viewing health states as points within a Risk Potential Field $\Phi(s) = -\log\lambda(s)$, we reinterpret causal effects as directional gradients, the ATE as a first-order projection, and positivity violations as structural boundaries—not estimation failures, but geometric features of the clinical landscape. Through simulation, we demonstrate that while standard methods (Cox regression, IPTW) collapse effect heterogeneity into scalar summaries, the field-based approach preserves clinically meaningful variation (~3.5-fold across state space) and explicitly maps regions where comparison is structurally impossible. This geometric perspective offers a complementary lens for RWD analysis: **a map, not a number.**
 ---
 
 # Introduction: The Newtonian Discomfort
@@ -131,16 +132,7 @@ In this framework, we treat $\Phi(s)$ as either:
 
 For the examples in this paper, we adopt the **stationary assumption** for simplicity.
 
-
-## $\Phi$ as a Lyapunov-like Function
-
-In many RWD systems, events occur preferentially along trajectories where:
-
-$$
-\mathbb{E}[\Phi(S_{t+1}) \mid S_t = s] \le \Phi(s)
-$$
-
-Thus, $\Phi$ behaves as a **stochastic Lyapunov-like function**: not strictly decreasing, but directionally aligned with instability and event occurrence.
+In non-stationary hazard settings, consider landmark or time-specific fields, or a cumulative definition of risk potential over $[0, \tau]$.
 
 
 # Intervention as a Transition Operator
@@ -165,6 +157,7 @@ $$
 $$
 
 This **risk-gradient field** encodes directions of maximal risk increase and local instability structure.
+For binary treatment, interpret the treatment axis as finite differences $\delta_A \Phi$ rather than a true derivative.
 
 **Connection to Cox regression:** In the Cox model, $\log \lambda(s) = \log h_0(t) + \beta' s$. Since $\Phi = -\log \lambda$, we have $\nabla_x \Phi = -\beta$ (independent of baseline hazard $h_0$). The field framework generalizes this to nonlinear $\Phi(s)$.
 
@@ -202,6 +195,8 @@ $$
 $$
 
 **ATE is a first-order projection of a high-dimensional geometry.**
+
+**Survival scale note:** For survival outcomes, $\delta_A \Phi(x) = \Phi(x,1) - \Phi(x,0) = \log\{\lambda(x,0)/\lambda(x,1)\}$ is the negative log hazard ratio. The HR field is $\exp\{-\delta_A \Phi(x)\}$.
 
 **Case 1: Homogeneous effects** ($\text{Var}_X[\delta_A \Phi] \approx 0$)
 
@@ -248,22 +243,24 @@ We simulated a 2D state space with survival outcomes:
 - Structural constraint: If $X_1 > 160$, then $A = 1$ (mandatory per guideline)
 - Heterogeneous effect: Treatment benefit increases with $X_1$
 
+**Estimation notes:** We enforce the structural rule $X_1 > 160 \Rightarrow A = 1$ deterministically to induce a structural positivity boundary. We estimate the hazard surface $\hat{\lambda}(s)$ using generalized additive models (GAMs) with tensor product smooths, fitting separate surfaces for $A=0$ and $A=1$. From these, we obtain $\hat{\Phi}(s) = -\log \hat{\lambda}(s)$ and compute $\delta_A \Phi(x) = \hat{\Phi}(x,1) - \hat{\Phi}(x,0)$. We report both $\delta_A \Phi$ and the HR field $\exp\{-\delta_A \Phi\}$. Visualization is restricted to regions with empirical support; disconnected regions (no joint support for both $A=0$ and $A=1$) are rendered as boundaries where $\delta_A \Phi$ is undefined. Alternative estimators (e.g., neural networks, random survival forests) could be substituted; the conceptual framework does not depend on a specific method.
+
 **Results (N = 3,000):**
 
 | Method | Output | Interpretation |
 |--------|--------|----------------|
 | Cox HR | 0.55 | Treatment reduces hazard by 45% |
 | IPTW ATE | 0.20 | Treatment increases 1-year survival by 20 percentage points |
-| Field $\delta_A \Phi$ | 0.42–1.66 | Effect varies 4-fold across state space |
+| HR field $\exp(-\delta_A \Phi)$ | 0.19–0.66 | Effect varies ~3.5-fold across state space |
 
-Traditional methods produce single numbers. The Field approach reveals that treatment benefit varies ~4-fold across the state space, with the largest effects in high-BP patients—precisely those for whom the guideline mandates treatment.
+Traditional methods produce single numbers. The Field approach reveals that treatment benefit varies ~3.5-fold across the state space, with the largest effects in high-BP patients—precisely those for whom the guideline mandates treatment.
 
 ![Treatment effect field showing heterogeneity and structural boundary at $X_1 > 160$. Gray region indicates positivity violation where comparison is structurally impossible.](fig_field_approach.png){#fig-field width="90%"}
 
 **Key Messages:**
 
 1. Traditional methods are not wrong—Cox and IPTW correctly estimate average effects
-2. But averages hide structure—HR = 0.55 does not reveal 4-fold variation
+2. But averages hide structure—HR = 0.55 does not reveal ~3.5-fold variation
 3. Positivity violation is information—the gray zone reflects clinical logic
 4. Field-based output is a map, not a number
 
@@ -307,6 +304,7 @@ The Epidynamix framework offers a complementary perspective to standard causal i
 2. Visualize the treatment effect landscape when possible
 3. Treat positivity violations as findings, not errors
 4. Consider whether the causal question is answerable before estimating
+5. Report HR field maps ($\exp\{-\delta_A \Phi\}$) alongside scalar summaries
 
 **Limitations:** The framework is conceptual; practical estimation of $\Phi(s)$ requires flexible models (e.g., GAMs, neural networks) and careful validation. Extension to time-varying treatments and high-dimensional states remains an open challenge.
 
