@@ -228,9 +228,7 @@ $$
 \text{ATE}
 \;\approx\;
 \mathbb{E}_X
-\left[
-\Phi(X,0) - \Phi(X,1)
-\right]
+\left[\Phi(X,0) - \Phi(X,1)\right]
 $$
 
 **ATE is a first-order projection of a high-dimensional geometry.**
