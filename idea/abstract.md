@@ -40,10 +40,10 @@ This increasingly resembles a Newtonian abstraction applied outside its natural 
 
 ## 2. An Einsteinian Analogy: From Force to Field
 
-Einstein did not reinterpret gravity by refining the force.
+Einstein did not reinterpret gravity by refining the force.  
 He removed the force.
 
-Objects do not respond to gravity.
+Objects do not respond to gravity.  
 They follow geodesics in a curved spacetime.
 
 We propose an analogous shift:
@@ -72,7 +72,7 @@ $$
 P(S_{t+1} \mid S_t) = K(S_t, S_{t+1})
 $$
 
-Regions where $K$ assigns zero probability are *structural*, not violations.
+Regions where $K$ assigns zero probability are **structural**, not violations.
 
 ---
 
@@ -82,8 +82,10 @@ Regions where $K$ assigns zero probability are *structural*, not violations.
 
 Define a local risk field:
 
-$$ \lambda(s) = \lim_{\Delta t \to 0} \frac{P(T \in [t, t+\Delta t) \mid S_t = s)}{\Delta t} $$
-
+$$
+\lambda(s) = \lim_{\Delta t \to 0}
+\frac{P(T \in [t, t+\Delta t) \mid S_t = s)}{\Delta t}
+$$
 
 This is estimable using standard survival models.
 
@@ -101,12 +103,12 @@ Interpretation:
 - low $\Phi$ → high risk
 - high $\Phi$ → relative stability
 
-$\Phi$ is not an outcome.
-It is a geometric property of the state space.
+$\Phi$ is not an outcome.  
+It is a **geometric property of the state space**.
 
 ---
 
-## 5. Φ as a Lyapunov-like Function
+## 5. $\Phi$ as a Lyapunov-like Function
 
 Consider system evolution:
 
@@ -123,10 +125,6 @@ $$
 Thus, $\Phi$ behaves as a **stochastic Lyapunov-like function**:
 - not strictly decreasing
 - but directionally aligned with instability and event occurrence
-
-This allows us to:
-- define system directionality without average effects
-- analyze stability structure before causal contrasts
 
 ---
 
@@ -145,35 +143,43 @@ $$
 \mathcal{I}_a(x,a') = (x,a)
 $$
 
-Interventions move the system across the field.
+Interventions move the system across the field.  
 They do not directly generate outcomes.
 
 ---
 
 ## 7. Vector Field Interpretation of Risk and Protection
 
-### 7.1 Gradient of the Potential
+### 7.1 Gradient of the Potential (Risk Vector Field)
 
-$\Phi$ defines a scalar field.
-Its gradient defines a vector field:
+$\Phi$ defines a scalar field on $\mathcal{S}$.  
+Its gradient defines a **vector field**:
 
-$$ \nabla \Phi(s) = \left[ \frac{\partial \Phi}{\partial x_1}, \ldots, \frac{\partial \Phi}{\partial x_p}, \frac{\partial \Phi}{\partial a} \right] $$
+$$
+\nabla \Phi(s) =
+\left(
+\frac{\partial \Phi}{\partial x_1},
+\ldots,
+\frac{\partial \Phi}{\partial x_p},
+\frac{\partial \Phi}{\partial a}
+\right)
+$$
 
-
-
-This is the **risk-gradient field**.
+This **risk-gradient field** encodes:
+- directions of maximal risk increase
+- local instability structure of the system
 
 ---
 
-### 7.2 Directional Effects
+### 7.2 Directional Effects as Local Geometry
 
-An intervention induces a displacement:
+An intervention induces a local displacement:
 
 $$
-\Delta s = (0,\dots,0,\Delta a)
+\Delta s = (0,\ldots,0,\Delta a)
 $$
 
-The local change in potential is approximated by:
+The induced change in potential is approximated by:
 
 $$
 \Delta \Phi
@@ -182,10 +188,15 @@ $$
 $$
 
 Definitions:
-- **Risk-increasing effect** if $\Delta \Phi < 0$
-- **Protective effect** if $\Delta \Phi > 0$
+- **Risk-increasing effect:** $\Delta \Phi < 0$
+- **Protective effect:** $\Delta \Phi > 0$
 
-These are *local, state-dependent* properties.
+These effects are:
+- local
+- state-dependent
+- directional
+
+They are **not global scalar quantities**.
 
 ---
 
@@ -193,7 +204,7 @@ These are *local, state-dependent* properties.
 
 The true object is the field $\Phi(x,a)$.
 
-A first-order Taylor expansion gives:
+A first-order Taylor expansion in $a$ gives:
 
 $$
 \Phi(x,1)
@@ -206,7 +217,9 @@ $$
 Therefore:
 
 $$
-\Phi(x,0) - \Phi(x,1) \approx - \frac{\partial \Phi}{\partial a}
+\Phi(x,0) - \Phi(x,1)
+\approx
+- \frac{\partial \Phi}{\partial a}
 $$
 
 Averaging over $X$ yields:
@@ -222,8 +235,6 @@ $$
 
 **ATE is a first-order projection of a high-dimensional geometry.**
 
-Nonlinearity, curvature, and heterogeneity are discarded by construction.
-
 ---
 
 ## 9. Positivity Reinterpreted Geometrically
@@ -235,45 +246,22 @@ $$
 $$
 
 In the field view:
-- positivity violation corresponds to *disconnected regions* of $\mathcal{S}$
+- positivity violations correspond to **disconnected regions** of $\mathcal{S}$
 - these are geometric constraints, not estimation failures
-
-The causal question itself may not be defined across such regions.
 
 ---
 
 ## 10. Relation to MSM and g-formula
 
 Marginal structural models and g-formulae can be reinterpreted as:
+- attempts to estimate **average flow** along specific field directions
+- under assumptions of smooth connectivity
 
-- attempts to estimate *average flow* along specific field directions
-- under assumptions that enforce smooth connectivity of $\mathcal{S}$
-
-When connectivity fails, weights diverge because geometry does.
-
----
-
-## 11. Toy Interpretation (Conceptual)
-
-- ATE ≈ average projection of $\nabla \Phi$ onto treatment axis
-- Zero ATE can arise from opposing local vectors
-- Field view preserves this structure instead of averaging it away
+Weight explosion reflects **geometric divergence**.
 
 ---
 
-## 12. Theorem (Informal Statement)
-
-**Proposition (ATE as Projection).**  
-Under smoothness and local linearity of $\Phi(x,a)$ in $a$,
-the average treatment effect corresponds to the first-order
-directional derivative of $\Phi$ along the treatment coordinate,
-averaged over the marginal distribution of $X$.
-
-Higher-order geometry is ignored.
-
----
-
-## 13. Implications
+## 11. Implications
 
 - Counterfactual existence is not required
 - Positivity violations become structural information
@@ -282,25 +270,21 @@ Higher-order geometry is ignored.
 
 ---
 
-## 14. Closing Perspective
+## 12. Closing Perspective
 
-Newtonian mechanics is not wrong.
+Newtonian mechanics is not wrong.  
 It is flat-space physics.
 
-Causal inference is not false.
+Causal inference is not false.  
 It is a low-curvature approximation.
 
-Real-world epidemiology may require a geometric view.
+**Real-world epidemiology may require a geometric view.**
 
+---
 
-
-
-
-# Appendix: Mathematical Notes
+# Appendix
 
 ## A1. ATE as Directional Derivative
-
-ATE는 다음과 같이 해석할 수 있다.
 
 $$
 \text{ATE}
@@ -311,13 +295,13 @@ $$
 \right]
 $$
 
-여기서 $\mathbf{e}_A$는 처치 축 방향 단위벡터다.
+where $\mathbf{e}_A$ is the unit vector along the treatment coordinate.
 
 ---
 
-## A2. 고차 효과와 곡률
+## A2. Curvature Effects
 
-2차 항을 포함하면,
+Including second-order terms:
 
 $$
 \Delta \Phi
@@ -330,40 +314,15 @@ H_\Phi
 \Delta s
 $$
 
-ATE는 $H_\Phi$ (곡률)를 무시한다.
+ATE ignores curvature encoded in $H_\Phi$.
 
 ---
 
-## A3. MSM의 재해석
+## A3. Analogy Table
 
-MSM은 다음을 추정한다.
-
-- 특정 경로에 대한 평균적 장 흐름
-- 상태공간이 충분히 연결되어 있다는 가정 하에서
-
-가중치 폭발은  
-기하학적 단절의 신호다.
-
----
-
-## A4. 관측자 포함 동역학
-
-관측/정책/모델은 전이 커널을 바꾼다.
-
-$$
-K_{t+1} = \mathcal{M}(K_t)
-$$
-
-이는 관측자가 시스템 내부에 있음을 의미한다.
-
----
-
-## A5. 비유 요약
-
-| 고전 | 장 중심 |
-|----|----|
-| 힘 | 잠재장 |
-| 효과 | 방향 미분 |
-| ATE | 1차 투영 |
-| 위반 | 구조 정보 |
-
+| Classical | Field-based |
+|---------|------------|
+| Force | Potential field |
+| Effect | Directional derivative |
+| ATE | First-order projection |
+| Violation | Structural geometry |
