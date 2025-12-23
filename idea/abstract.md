@@ -270,12 +270,9 @@ $$
 Averaging over $X$ yields the ATE:
 
 $$
-\text{ATE}
-=
-\mathbb{E}_X
+\text{ATE} = \mathbb{E}_X
 \left[\Phi(X,1) - \Phi(X,0)\right]
-=
-\mathbb{E}_X[\delta_A \Phi(X)]
+= \mathbb{E}_X[\delta_A \Phi(X)]
 $$
 
 **ATE is a first-order projection of a high-dimensional geometry.**
