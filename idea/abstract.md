@@ -164,13 +164,14 @@ Its gradient defines a vector field:
 $$
 \nabla \Phi(s)
 =
-\left(
-\frac{\partial \Phi}{\partial x_1},
-\dots,
-\frac{\partial \Phi}{\partial x_p},
+\begin{bmatrix}
+\frac{\partial \Phi}{\partial x_1} \\
+\vdots \\
+\frac{\partial \Phi}{\partial x_p} \\
 \frac{\partial \Phi}{\partial a}
-\right)
+\end{bmatrix}
 $$
+
 
 This is the **risk-gradient field**.
 
@@ -305,3 +306,79 @@ Causal inference is not false.
 It is a low-curvature approximation.
 
 Real-world epidemiology may require a geometric view.
+
+
+
+
+
+# Appendix: Mathematical Notes
+
+## A1. ATE as Directional Derivative
+
+ATE는 다음과 같이 해석할 수 있다.
+
+$$
+\text{ATE}
+\approx
+\mathbb{E}_S
+\left[
+\nabla \Phi(S) \cdot \mathbf{e}_A
+\right]
+$$
+
+여기서 $\mathbf{e}_A$는 처치 축 방향 단위벡터다.
+
+---
+
+## A2. 고차 효과와 곡률
+
+2차 항을 포함하면,
+
+$$
+\Delta \Phi
+\approx
+\nabla \Phi \cdot \Delta s
++
+\frac{1}{2}
+\Delta s^\top
+H_\Phi
+\Delta s
+$$
+
+ATE는 $H_\Phi$ (곡률)를 무시한다.
+
+---
+
+## A3. MSM의 재해석
+
+MSM은 다음을 추정한다.
+
+- 특정 경로에 대한 평균적 장 흐름
+- 상태공간이 충분히 연결되어 있다는 가정 하에서
+
+가중치 폭발은  
+기하학적 단절의 신호다.
+
+---
+
+## A4. 관측자 포함 동역학
+
+관측/정책/모델은 전이 커널을 바꾼다.
+
+$$
+K_{t+1} = \mathcal{M}(K_t)
+$$
+
+이는 관측자가 시스템 내부에 있음을 의미한다.
+
+---
+
+## A5. 비유 요약
+
+| 고전 | 장 중심 |
+|----|----|
+| 힘 | 잠재장 |
+| 효과 | 방향 미분 |
+| ATE | 1차 투영 |
+| 위반 | 구조 정보 |
+
