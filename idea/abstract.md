@@ -1,45 +1,29 @@
 # Beyond Causal Inference?
-## A Field-Based Framework for Epidemiology with Real-World Data
+## A Field-Based Framework for Real-World Epidemiology
+
+> TL;DR
+> - Standard causal inference is powerful but structurally strained in RWD
+> - Positivity violation is a symptom, not the root problem
+> - Deeper fractures involve intervention identity, dynamics, counterfactual existence, and observer dependence
+> - We propose a field-based, state-space framework
+> - Classical causal estimands emerge as projections of the field, not primitive objects
 
 ---
 
-## Abstract
+## 1. Dissatisfaction with Causal Inference
+### — The Newtonian Feeling
 
-Causal inference has become the dominant framework for analyzing real-world data (RWD) in epidemiology, enabling principled estimation of treatment effects from observational settings. However, repeated structural difficulties—such as positivity violations, unstable interventions, and feedback between analysis and data generation—suggest deeper tensions between standard causal assumptions and the nature of real-world systems.
+Modern epidemiologic causal inference typically asks:
 
-We argue that these issues are not merely technical failures but symptoms of a force-based causal framing inherited from intervention-centric thinking. Inspired by the transition from Newtonian force models to Einsteinian field-based descriptions in physics, we propose a complementary perspective: describing epidemiologic systems through state-space dynamics and risk fields rather than counterfactual causal effects.
+    "What is the causal effect of intervention A on outcome Y?"
 
-This framework does not replace causal inference but offers a coordinate system better aligned with high-dimensional, time-varying, observer-including real-world data environments.
+Formally:
 
----
+    Effect = E[Y(1) - Y(0)]
 
-## 1. Introduction
-
-### 1.1 The success and limits of causal inference
-
-Modern epidemiology has been profoundly shaped by causal inference. Methods based on potential outcomes, counterfactual reasoning, and causal diagrams have enabled rigorous estimation of treatment effects from observational data, particularly when randomized controlled trials are infeasible.
-
-In idealized settings, causal questions are framed as:
-
-> What is the causal effect of intervention A on outcome Y?
-
-Formally, this is expressed as a contrast between potential outcomes:
-
-$$
-\tau = E[Y(1) - Y(0)]
-$$
-
-When supported by randomization or strong identifying assumptions, this estimand is both meaningful and operational.
-
-However, as causal inference has been increasingly applied to real-world data such as electronic health records, claims data, and registries, systematic tensions have emerged.
-
----
-
-### 1.2 A Newtonian intuition in causal reasoning
-
-At a conceptual level, standard causal framing implicitly treats interventions as external forces acting upon a system.
-
-This intuition is often visualized as follows.
+This framing is highly effective in randomized controlled trials.
+However, in real-world data (RWD), it increasingly resembles a
+Newtonian force-based intuition:.
 
 ```text
 (A) Causal inference view (force-based)
@@ -53,183 +37,267 @@ A = 1 --------------------> Y(1)
 Effect = E[Y(1) - Y(0)]
 ```
 
+Here, intervention A is treated as an external force acting on a system.
 
-This representation suggests:
+In RWD, this intuition becomes strained:
 
-- Interventions are well-defined and repeatable objects
-- Potential outcomes are simultaneously well-defined
-- Effects arise from switching the level of an intervention, analogous to applying a force
+- States are high-dimensional and time-varying
+- Interventions arise from system rules, guidelines, and feedback
+- Treatment and state co-evolve dynamically
 
-While powerful, this framing may be mismatched to systems in which interventions are endogenous, adaptive, and inseparable from system state.
-
----
-
-## 2. Positivity as a symptom, not the disease
-
-### 2.1 The positivity (overlap) assumption
-
-For a binary treatment A in {0,1} and covariates X, causal identification requires:
-
-$$
-0 < P(A = 1 \mid X = x) < 1 \quad \forall x \text{ with } P(X = x) > 0
-$$
-
-In real-world data, this condition is frequently violated due to:
-
-- Clinical guidelines and contraindications
-- Institutional and policy constraints
-- Time-varying disease severity
-- Physician and system-level decision rules
-
-The resulting issues—extreme propensity scores, unstable inverse weights, and trimming—are well documented.
+Yet the question remains force-based.
 
 ---
 
-### 2.2 Why positivity violations persist
+## 2. An Einsteinian Analogy
+### — From Force to Field
 
-We argue that positivity violations are not merely technical nuisances but early warning signals.
+Einstein did not ask:
+    "What force causes gravity?"
 
-They indicate that the causal question being asked may not be well-defined on the observed state space. In many real-world settings, certain counterfactuals are not just unobserved but structurally non-existent.
+He asked:
+    "Why do objects follow these paths?"
 
----
+Gravity was reinterpreted as curvature of spacetime.
+Objects do not respond to force; they follow geodesics.
 
-## 3. Deeper fractures beyond positivity
+We propose an analogous shift in epidemiology:
 
-### 3.1 Instability of interventions
-
-Causal inference presumes that intervention A is a stable, well-defined entity.
-
-In practice:
-
-- The same drug differs by dose, timing, sequencing, and co-administration
-- The same procedure differs by provider, institution, and context
-
-Formally:
-
-$$
-A \neq A
-$$
-
-This is not measurement error but ontological instability.
+- Causal effects are not forces
+- They are consequences of a risk / transition field
+- Interventions move systems within the field rather than directly producing outcomes
 
 ---
 
-### 3.2 Time, feedback, and system dynamics
+## 3. Positivity Is a Warning Light, Not the Core Problem
 
-Real-world systems evolve as:
+### 3.1 Positivity / Overlap (Standard Form)
 
-$$
-X_t \rightarrow A_t \rightarrow X_{t+1} \rightarrow A_{t+1} \rightarrow \dots
-$$
+For treatment A in {0,1} and covariates X:
 
-Treatment decisions both depend on and reshape the state space.
+    0 < P(A = 1 | X = x) < 1
 
-Even advanced causal tools such as marginal structural models retain reliance on well-defined counterfactual trajectories, an assumption that may fail in adaptive systems.
+for all x with positive density.
 
----
+In RWD, this assumption frequently fails due to:
+- clinical guidelines
+- contraindications
+- policy constraints
+- time-varying decision rules
 
-### 3.3 Observer inclusion
-
-Risk scores, prediction models, published evidence, and policy recommendations feed back into clinical decision-making.
-
-As a result, the data-generating process evolves as:
-
-$$
-S_{t+1} = M(S_t)
-$$
-
-The observer is not external to the system but part of its dynamics.
+The usual responses include:
+- trimming
+- weight truncation
+- redefining estimands
 
 ---
 
-## 4. A shift in perspective: from effects to fields
+### 3.2 Interpretation
 
-### 4.1 An Einsteinian analogy
+Positivity violation is not the fundamental failure.
+It is the earliest visible symptom of a deeper mismatch.
 
-Einstein did not ask what force gravity exerted. He asked why objects followed the paths they did.
+It signals that:
 
-Gravity became geometry, a property of spacetime itself.
-
-Analogously, instead of asking:
-
-> What is the causal effect of A on Y?
-
-we ask:
-
-> How are risk and transitions organized across the state space?
+    "This causal question may not exist on this state space."
 
 ---
 
-## 5. A field-based epidemiologic framework
+## 4. Deeper Fractures Beyond Positivity
 
-### 5.1 State space
+### 4.1 Instability of Intervention Identity
+
+Causal inference assumes:
+
+    "A is a well-defined, repeatable object."
+
+In RWD:
+- same drug ≠ same exposure
+- same surgery ≠ same procedure
+- same policy ≠ same mechanism
+
+Thus:
+
+    A ≠ A
+
+This is not measurement error.
+It is conceptual instability.
+
+---
+
+### 4.2 Dynamics and Mutual Construction
+
+Real systems evolve as:
+
+    X_t -> A_t -> X_{t+1} -> A_{t+1} -> ...
+
+Treatment and state recursively define each other.
+
+Marginal structural models attempt adjustment,
+but still assume meaningful counterfactual trajectories exist.
+
+That assumption itself becomes questionable.
+
+---
+
+### 4.3 Non-Existence of Counterfactuals
+
+In RWD, some counterfactuals are not unobserved,
+but impossible:
+
+- ethically forbidden
+- systemically disallowed
+- structurally unreachable
+
+This is not missing data.
+It is non-existence.
+
+---
+
+### 4.4 Observer Dependence
+
+Risk scores, prediction models, guidelines, and publications
+alter future data generation.
+
+The analyst is not external to the system.
+
+    Observation -> system update -> new observations
+
+Observer independence quietly collapses.
+
+---
+
+## 5. A Shift in the Question
+
+From:
+
+    "What is the causal effect of A on Y?"
+
+To:
+
+    "How are risk and transition structured across the state space?"
+
+---
+
+## 6. Field-Based Framework
+
+### 6.1 State Space
 
 Define the system state as:
 
-$$
-S_t = (X_t, A_t)
-$$
+    S_t = (X_t, A_t)
+
+Treatment is a coordinate of the system,
+not an external action.
 
 ---
 
-### 5.2 Risk field
+### 6.2 Risk Field
 
-Define a risk density over the state space:
+Define a risk field over the state space:
 
-$$
-\lambda(s) \ge 0
-$$
+    lambda(s) = instantaneous risk density at state s
 
-This field characterizes how adverse events concentrate across states, without invoking counterfactual contrasts.
+This can be estimated via:
+- Cox models
+- Poisson models
+- spline hazards
+- neural hazard models
 
----
-
-### 5.3 Transition dynamics
-
-System evolution is governed by a transition kernel:
-
-$$
-P(S_{t+1} \mid S_t) = K(S_t)
-$$
+Interpretation differs:
+- Not "treatment effect"
+- But "local risk geometry"
 
 ---
 
-### 5.4 Interventions as operators
+### 6.3 Transition Field
 
-Interventions are not forces but state relocation operators:
+Define a transition kernel:
 
-$$
-A : s \mapsto s'
-$$
+    P(S_{t+1} = s' | S_t = s) = K(s, s')
 
-Their impact is evaluated via changes in potential-like quantities:
-
-$$
-\Delta \Phi = \Phi(s') - \Phi(s)
-$$
-
-rather than contrasts between unrealized counterfactual worlds.
+This kernel describes system dynamics.
+Zero-probability regions are meaningful, not violations.
 
 ---
 
-## 6. Why this framework aligns with real-world data
+### 6.4 Intervention Reinterpreted
 
-- Positivity breakdowns become structural features rather than failures
+Instead of:
+
+    do(A = a)
+
+We define intervention as:
+
+    A : s -> s'
+
+An operator that moves the system within the field.
+
+---
+
+## 7. Potential Function Phi(s)
+### — Information-Geometric Interpretation
+
+Define a potential function over the state space:
+
+    Phi(s) = - log lambda(s)
+
+or more generally:
+
+    Phi(s) = information cost / entropy density at s
+
+Properties:
+- High risk regions correspond to low potential
+- System trajectories flow toward lower Phi
+- Events concentrate where Phi gradients are steep
+
+This mirrors:
+- free energy in physics
+- surprisal in information theory
+
+---
+
+## 8. Where Classical Causal Estimands Come From
+### — Projection, Not Foundation
+
+Classical causal estimands emerge as projections of the field.
+
+The average treatment effect (ATE) corresponds to:
+
+    A contrast between two slices of the field at A = 1 and A = 0,
+    averaged over the covariate distribution.
+
+In other words:
+
+- Fix the state distribution
+- Compare Phi(s) or lambda(s) across treatment coordinates
+- Average the contrast
+
+Thus:
+
+    ATE = coarse projection of a high-dimensional geometry
+
+It is not fundamental.
+It is a summary.
+
+---
+
+## 9. Why This Matters
+
+- Positivity violations become structural features, not failures
 - Non-existent counterfactuals are no longer required
-- Feedback and adaptation are naturally represented
-- Geometry and topology of risk replace average effect summaries
+- Observer feedback is naturally included
+- Average effects are optional, not mandatory
 
-This framework complements causal inference by providing a coordinate system better aligned with real-world complexity.
+Causal inference is not wrong.
+It is a special coordinate system.
 
 ---
 
-## 7. Conclusion
+## 10. Closing Analogy
 
-Causal inference remains indispensable, but its force-based intuition may be ill-suited for all settings.
-
-For real-world data, a field-based description of state-space dynamics may provide a more faithful representation of how risk, decisions, and outcomes co-evolve.
-
-Newton was not wrong.  
+Newton was not wrong.
 Einstein changed the coordinate system.
 
-
+Causal inference is Newtonian.
+Real-world epidemiology may require curvature.
