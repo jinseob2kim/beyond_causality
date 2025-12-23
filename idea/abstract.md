@@ -2,302 +2,203 @@
 ## A Field-Based Framework for Real-World Epidemiology
 
 > TL;DR
-> - Standard causal inference is powerful but structurally strained in RWD
+> - Standard causal inference is powerful but strained in RWD
 > - Positivity violation is a symptom, not the root problem
-> - Deeper fractures involve intervention identity, dynamics, counterfactual existence, and observer dependence
-> - We propose a field-based, state-space framework
-> - Classical causal estimands emerge as projections of the field, not primitive objects
+> - We propose a field-based, state-space formulation
+> - Classical causal estimands arise as projections of the field
 
 ---
 
 ## 1. Dissatisfaction with Causal Inference
 ### — The Newtonian Feeling
 
-Modern epidemiologic causal inference typically asks:
+Modern causal inference asks:
 
-    "What is the causal effect of intervention A on outcome Y?"
+$$
+\text{What is } \mathbb{E}[Y(1) - Y(0)] \, ?
+$$
 
-Formally:
+This assumes the existence of well-defined potential outcomes:
 
-    Effect = E[Y(1) - Y(0)]
+$$
+Y(a) \in \mathcal{Y}, \quad a \in \{0,1\}
+$$
 
-This framing is highly effective in randomized controlled trials.
-However, in real-world data (RWD), it increasingly resembles a
-Newtonian force-based intuition:.
+and interprets intervention as an external force:
 
-```text
-(A) Causal inference view (force-based)
+$$
+A \;\longrightarrow\; Y
+$$
 
-A = 0 --------------------> Y(0)
-|
-| causal effect
-v
-A = 1 --------------------> Y(1)
+In RWD, however, the system state is high-dimensional and evolving:
 
-Effect = E[Y(1) - Y(0)]
-```
+$$
+S_t = (X_t, A_t), \quad S_{t+1} = \mathcal{F}(S_t)
+$$
 
-Here, intervention A is treated as an external force acting on a system.
-
-In RWD, this intuition becomes strained:
-
-- States are high-dimensional and time-varying
-- Interventions arise from system rules, guidelines, and feedback
-- Treatment and state co-evolve dynamically
-
-Yet the question remains force-based.
+The force-based abstraction becomes strained.
 
 ---
 
 ## 2. An Einsteinian Analogy
 ### — From Force to Field
 
-Einstein did not ask:
-    "What force causes gravity?"
+Instead of modeling effects as forces:
 
-He asked:
-    "Why do objects follow these paths?"
+$$
+A \mapsto Y
+$$
 
-Gravity was reinterpreted as curvature of spacetime.
-Objects do not respond to force; they follow geodesics.
+we reinterpret outcomes as trajectories induced by a field defined
+over the state space.
 
-We propose an analogous shift in epidemiology:
-
-- Causal effects are not forces
-- They are consequences of a risk / transition field
-- Interventions move systems within the field rather than directly producing outcomes
+Objects do not respond to forces.
+They follow paths determined by geometry.
 
 ---
 
-## 3. Positivity Is a Warning Light, Not the Core Problem
+## 3. Positivity Is a Symptom, Not the Disease
 
-### 3.1 Positivity / Overlap (Standard Form)
+### 3.1 Positivity / Overlap
 
-For treatment A in {0,1} and covariates X:
+Standard causal inference assumes:
 
-   $$ 0 < P(A = 1 | X = x) < 1 $$
+$$
+0 < P(A = 1 \mid X = x) < 1
+$$
 
-for all x with positive density.
+for all $x$ with positive density.
 
-In RWD, this assumption frequently fails due to:
-- clinical guidelines
-- contraindications
-- policy constraints
-- time-varying decision rules
+In RWD, structural constraints imply:
 
-The usual responses include:
-- trimming
-- weight truncation
-- redefining estimands
+$$
+P(A = 1 \mid X = x) \in \{0,1\}
+$$
 
----
+for non-negligible regions of the state space.
 
-### 3.2 Interpretation
-
-Positivity violation is not the fundamental failure.
-It is the earliest visible symptom of a deeper mismatch.
-
-It signals that:
-
-    "This causal question may not exist on this state space."
+This is not a technical failure.
+It is a geometric one.
 
 ---
 
-## 4. Deeper Fractures Beyond Positivity
+## 4. State-Space and Dynamics
 
-### 4.1 Instability of Intervention Identity
+### 4.1 State Definition
 
-Causal inference assumes:
+We define the system state as:
 
-    " $$A$$ is a well-defined, repeatable object."
+$$
+S_t = (X_t, A_t) \in \mathcal{S}
+$$
 
-In RWD:
-- same drug ≠ same exposure
-- same surgery ≠ same procedure
-- same policy ≠ same mechanism
+where treatment is a coordinate, not an external action.
 
-Thus:
+The system evolves according to a transition kernel:
 
-   $$ A ≠ A $$
-
-This is not measurement error.
-It is conceptual instability.
+$$
+P(S_{t+1} \mid S_t) = K(S_t, S_{t+1})
+$$
 
 ---
 
-### 4.2 Dynamics and Mutual Construction
+## 5. Risk Field
 
-Real systems evolve as:
+### 5.1 Local Risk Density
 
-    $$X_t -> A_t -> X_{t+1} -> A_{t+1} -> ...$$
+Define a risk (hazard) field over the state space:
 
-Treatment and state recursively define each other.
+$$
+\lambda(s) = \lim_{\Delta t \to 0}
+\frac{P(T \in [t, t+\Delta t) \mid S_t = s)}{\Delta t}
+$$
 
-Marginal structural models attempt adjustment,
-but still assume meaningful counterfactual trajectories exist.
-
-That assumption itself becomes questionable.
-
----
-
-### 4.3 Non-Existence of Counterfactuals
-
-In RWD, some counterfactuals are not unobserved,
-but impossible:
-
-- ethically forbidden
-- systemically disallowed
-- structurally unreachable
-
-This is not missing data.
-It is non-existence.
+This is estimable from RWD using standard survival models.
 
 ---
 
-### 4.4 Observer Dependence
+### 5.2 Potential Function
 
-Risk scores, prediction models, guidelines, and publications
-alter future data generation.
+We define an information-theoretic potential:
 
-The analyst is not external to the system.
+$$
+\Phi(s) = -\log \lambda(s)
+$$
 
-    Observation -> system update -> new observations
+Regions of:
+- high risk → low potential
+- low risk → high potential
 
-Observer independence quietly collapses.
-
----
-
-## 5. A Shift in the Question
-
-From:
-
-    "What is the causal effect of $$A$$ on $$Y$$ ?"
-
-To:
-
-    "How are risk and transition structured across the state space?"
+System trajectories tend to flow toward lower $\Phi(s)$.
 
 ---
 
-## 6. Field-Based Framework
+## 6. Intervention as a Transition Operator
 
-### 6.1 State Space
+Instead of a do-operator:
 
-Define the system state as:
+$$
+\text{do}(A = a)
+$$
 
-    $$S_t = (X_t, A_t)$$
+we define intervention as a state transformation:
 
-Treatment is a coordinate of the system,
-not an external action.
+$$
+\mathcal{I}_a : \mathcal{S} \to \mathcal{S}, \quad
+\mathcal{I}_a(s) = (x, a)
+$$
 
----
-
-### 6.2 Risk Field
-
-Define a risk field over the state space:
-
-    $\lambda(s)$ = instantaneous risk density at state $s$
-
-This can be estimated via:
-- Cox models
-- Poisson models
-- spline hazards
-- neural hazard models
-
-Interpretation differs:
-- Not "treatment effect"
-- But "local risk geometry"
+Interventions reposition the system within the field.
 
 ---
 
-### 6.3 Transition Field
+## 7. Where Causal Estimands Come From
+### — Projection View
 
-Define a transition kernel:
+The average treatment effect is:
 
-    $$P(S_{t+1} = s' | S_t = s) = K(s, s')$$
+$$
+\text{ATE} = \mathbb{E}[Y(1) - Y(0)]
+$$
 
-This kernel describes system dynamics.
-Zero-probability regions are meaningful, not violations.
+In the field view, this corresponds to a projection:
 
----
+$$
+\text{ATE}
+\;\approx\;
+\mathbb{E}_X \left[
+\lambda(X, A=1) - \lambda(X, A=0)
+\right]
+$$
 
-### 6.4 Intervention Reinterpreted
+or equivalently,
 
-Instead of:
+$$
+\text{ATE}
+\;\approx\;
+\mathbb{E}_X \left[
+\Phi(X,0) - \Phi(X,1)
+\right]
+$$
 
-    $$do(A = a)$$
-
-We define intervention as:
-
-    $$A : s -> s'$$
-
-An operator that moves the system within the field.
-
----
-
-## 7. Potential Function $\Phi(s)$
-### — Information-Geometric Interpretation
-
-Define a potential function over the state space:
-
-    $$\Phi(s) = - \log \lambda(s)$$
-
-or more generally:
-
-    $$\Phi(s)$$ = information cost / entropy density at $s$
-
-Properties:
-- High risk regions correspond to low potential
-- System trajectories flow toward lower Phi
-- Events concentrate where Phi gradients are steep
-
-This mirrors:
-- free energy in physics
-- surprisal in information theory
+This is a low-dimensional summary of a high-dimensional field.
 
 ---
 
-## 8. Where Classical Causal Estimands Come From
-### — Projection, Not Foundation
+## 8. Interpretation
 
-Classical causal estimands emerge as projections of the field.
+- The field $\lambda(s)$ is fundamental
+- Causal estimands are coordinate-dependent summaries
+- Positivity violations indicate inaccessible regions of $\mathcal{S}$
 
-The average treatment effect (ATE) corresponds to:
-
-    A contrast between two slices of the field at $$A$$ = 1 and $$A$$ = 0,
-    averaged over the covariate distribution.
-
-In other words:
-
-- Fix the state distribution
-- Compare Phi(s) or lambda(s) across treatment coordinates
-- Average the contrast
-
-Thus:
-
-    ATE = coarse projection of a high-dimensional geometry
-
-It is not fundamental.
-It is a summary.
+Causal inference is not false.
+It is incomplete.
 
 ---
 
-## 9. Why This Matters
+## 9. Closing Analogy
 
-- Positivity violations become structural features, not failures
-- Non-existent counterfactuals are no longer required
-- Observer feedback is naturally included
-- Average effects are optional, not mandatory
+Newtonian mechanics is not wrong.
+It is flat-space physics.
 
-Causal inference is not wrong.
-It is a special coordinate system.
-
----
-
-## 10. Closing Analogy
-
-Newton was not wrong.
-Einstein changed the coordinate system.
-
-Causal inference is Newtonian.
 Real-world epidemiology may require curvature.
