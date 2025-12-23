@@ -1,6 +1,7 @@
 ### Figure 1. Causal Effect vs Field-based Perspective
 
 (A) Causal inference view (force-based)
+```text
 ----------------------------------------
 
    A = 0  -------------------->  Y(0)
