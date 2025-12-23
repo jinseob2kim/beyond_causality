@@ -1,90 +1,62 @@
 # Beyond Causal Inference?
-## A Field-Based Framework for Real-World Epidemiology
+## A Field-Based, Dynamical Framework for Real-World Epidemiology
 
-> TL;DR
-> - Standard causal inference is powerful but strained in RWD
-> - Positivity violation is a symptom, not the root problem
-> - We propose a field-based, state-space formulation
-> - Classical causal estimands arise as projections of the field
+> **Core message**  
+> Causal effects are not forces.  
+> They are directional derivatives of a risk potential field.
 
 ---
 
-## 1. Dissatisfaction with Causal Inference
-### — The Newtonian Feeling
+## 1. Motivation: The Newtonian Discomfort
 
-Modern causal inference asks:
-
-$$
-\text{What is } \mathbb{E}[Y(1) - Y(0)] \, ?
-$$
-
-This assumes the existence of well-defined potential outcomes:
+Modern causal inference in epidemiology typically asks:
 
 $$
-Y(a) \in \mathcal{Y}, \quad a \in \{0,1\}
+\text{ATE} = \mathbb{E}[Y(1) - Y(0)]
 $$
 
-and interprets intervention as an external force:
+This formulation assumes:
+- well-defined potential outcomes $Y(a)$
+- interventions acting as external causes
+- counterfactual symmetry between $a=0$ and $a=1$
+
+This works extremely well in randomized controlled trials.
+
+However, in real-world data (RWD), the system is:
+- high-dimensional
+- time-varying
+- policy- and guideline-constrained
+- observer-influenced
+
+Yet we still model intervention as a force:
 
 $$
 A \;\longrightarrow\; Y
 $$
 
-In RWD, however, the system state is high-dimensional and evolving:
-
-$$
-S_t = (X_t, A_t), \quad S_{t+1} = \mathcal{F}(S_t)
-$$
-
-The force-based abstraction becomes strained.
+This increasingly resembles a Newtonian abstraction applied outside its natural domain.
 
 ---
 
-## 2. An Einsteinian Analogy
-### — From Force to Field
+## 2. An Einsteinian Analogy: From Force to Field
 
-Instead of modeling effects as forces:
+Einstein did not reinterpret gravity by refining the force.
+He removed the force.
 
-$$
-A \mapsto Y
-$$
+Objects do not respond to gravity.
+They follow geodesics in a curved spacetime.
 
-we reinterpret outcomes as trajectories induced by a field defined
-over the state space.
+We propose an analogous shift:
 
-Objects do not respond to forces.
-They follow paths determined by geometry.
-
----
-
-## 3. Positivity Is a Symptom, Not the Disease
-
-### 3.1 Positivity / Overlap
-
-Standard causal inference assumes:
-
-$$
-0 < P(A = 1 \mid X = x) < 1
-$$
-
-for all $x$ with positive density.
-
-In RWD, structural constraints imply:
-
-$$
-P(A = 1 \mid X = x) \in \{0,1\}
-$$
-
-for non-negligible regions of the state space.
-
-This is not a technical failure.
-It is a geometric one.
+- Causal effects are not primitive forces
+- Outcomes arise from motion within a structured field
+- Interventions reposition systems inside that field
 
 ---
 
-## 4. State-Space and Dynamics
+## 3. State Space and Dynamics
 
-### 4.1 State Definition
+### 3.1 State Definition
 
 We define the system state as:
 
@@ -92,7 +64,7 @@ $$
 S_t = (X_t, A_t) \in \mathcal{S}
 $$
 
-where treatment is a coordinate, not an external action.
+where treatment $A_t$ is a coordinate of the system, not an external action.
 
 The system evolves according to a transition kernel:
 
@@ -100,36 +72,65 @@ $$
 P(S_{t+1} \mid S_t) = K(S_t, S_{t+1})
 $$
 
+Regions where $K$ assigns zero probability are *structural*, not violations.
+
 ---
 
-## 5. Risk Field
+## 4. Risk Field and Potential Function
 
-### 5.1 Local Risk Density
+### 4.1 Risk (Hazard) Field
 
-Define a risk (hazard) field over the state space:
+Define a local risk field:
 
 $$
-\lambda(s) = \lim_{\Delta t \to 0}
+\lambda(s)
+=
+\lim_{\Delta t \to 0}
 \frac{P(T \in [t, t+\Delta t) \mid S_t = s)}{\Delta t}
 $$
 
-This is estimable from RWD using standard survival models.
+This is estimable using standard survival models.
 
 ---
 
-### 5.2 Potential Function
+### 4.2 Potential Function
 
-We define an information-theoretic potential:
+Define a risk potential:
 
 $$
 \Phi(s) = -\log \lambda(s)
 $$
 
-Regions of:
-- high risk → low potential
-- low risk → high potential
+Interpretation:
+- low $\Phi$ → high risk
+- high $\Phi$ → relative stability
 
-System trajectories tend to flow toward lower $\Phi(s)$.
+$\Phi$ is not an outcome.
+It is a geometric property of the state space.
+
+---
+
+## 5. Φ as a Lyapunov-like Function
+
+Consider system evolution:
+
+$$
+S_{t+1} = \mathcal{F}(S_t)
+$$
+
+In many RWD systems, events occur preferentially along trajectories where:
+
+$$
+\mathbb{E}[\Phi(S_{t+1}) \mid S_t = s] \le \Phi(s)
+$$
+
+Thus, $\Phi$ behaves as a **stochastic Lyapunov-like function**:
+- not strictly decreasing
+- but directionally aligned with instability and event occurrence
+
+This allows us to:
+- define system directionality without average effects
+- analyze stability structure before causal contrasts
 
 ---
 
@@ -138,67 +139,169 @@ System trajectories tend to flow toward lower $\Phi(s)$.
 Instead of a do-operator:
 
 $$
-\text{do}(A = a)
+\text{do}(A=a)
 $$
 
 we define intervention as a state transformation:
 
 $$
 \mathcal{I}_a : \mathcal{S} \to \mathcal{S}, \quad
-\mathcal{I}_a(s) = (x, a)
+\mathcal{I}_a(x,a') = (x,a)
 $$
 
-Interventions reposition the system within the field.
+Interventions move the system across the field.
+They do not directly generate outcomes.
 
 ---
 
-## 7. Where Causal Estimands Come From
-### — Projection View
+## 7. Vector Field Interpretation of Risk and Protection
 
-The average treatment effect is:
+### 7.1 Gradient of the Potential
+
+$\Phi$ defines a scalar field.
+Its gradient defines a vector field:
 
 $$
-\text{ATE} = \mathbb{E}[Y(1) - Y(0)]
+\nabla \Phi(s)
+=
+\left(
+\frac{\partial \Phi}{\partial x_1},
+\dots,
+\frac{\partial \Phi}{\partial x_p},
+\frac{\partial \Phi}{\partial a}
+\right)
 $$
 
-In the field view, this corresponds to a projection:
+This is the **risk-gradient field**.
+
+---
+
+### 7.2 Directional Effects
+
+An intervention induces a displacement:
+
+$$
+\Delta s = (0,\dots,0,\Delta a)
+$$
+
+The local change in potential is approximated by:
+
+$$
+\Delta \Phi
+\approx
+\nabla \Phi(s) \cdot \Delta s
+$$
+
+Definitions:
+- **Risk-increasing effect** if $\Delta \Phi < 0$
+- **Protective effect** if $\Delta \Phi > 0$
+
+These are *local, state-dependent* properties.
+
+---
+
+## 8. ATE as a First-Order Taylor Projection
+
+The true object is the field $\Phi(x,a)$.
+
+A first-order Taylor expansion gives:
+
+$$
+\Phi(x,1)
+\approx
+\Phi(x,0)
++
+\frac{\partial \Phi(x,a)}{\partial a}\Big|_{a=0}
+$$
+
+Therefore:
+
+$$
+\Phi(x,0) - \Phi(x,1)
+\approx
+-
+\frac{\partial \Phi}{\partial a}
+$$
+
+Averaging over $X$ yields:
 
 $$
 \text{ATE}
 \;\approx\;
-\mathbb{E}_X \left[
-\lambda(X, A=1) - \lambda(X, A=0)
-\right]
-$$
-
-or equivalently,
-
-$$
-\text{ATE}
-\;\approx\;
-\mathbb{E}_X \left[
+\mathbb{E}_X
+\left[
 \Phi(X,0) - \Phi(X,1)
 \right]
 $$
 
-This is a low-dimensional summary of a high-dimensional field.
+**ATE is a first-order projection of a high-dimensional geometry.**
+
+Nonlinearity, curvature, and heterogeneity are discarded by construction.
 
 ---
 
-## 8. Interpretation
+## 9. Positivity Reinterpreted Geometrically
 
-- The field $\lambda(s)$ is fundamental
-- Causal estimands are coordinate-dependent summaries
-- Positivity violations indicate inaccessible regions of $\mathcal{S}$
+Standard positivity requires:
 
-Causal inference is not false.
-It is incomplete.
+$$
+0 < P(A=1 \mid X=x) < 1
+$$
+
+In the field view:
+- positivity violation corresponds to *disconnected regions* of $\mathcal{S}$
+- these are geometric constraints, not estimation failures
+
+The causal question itself may not be defined across such regions.
 
 ---
 
-## 9. Closing Analogy
+## 10. Relation to MSM and g-formula
+
+Marginal structural models and g-formulae can be reinterpreted as:
+
+- attempts to estimate *average flow* along specific field directions
+- under assumptions that enforce smooth connectivity of $\mathcal{S}$
+
+When connectivity fails, weights diverge because geometry does.
+
+---
+
+## 11. Toy Interpretation (Conceptual)
+
+- ATE ≈ average projection of $\nabla \Phi$ onto treatment axis
+- Zero ATE can arise from opposing local vectors
+- Field view preserves this structure instead of averaging it away
+
+---
+
+## 12. Theorem (Informal Statement)
+
+**Proposition (ATE as Projection).**  
+Under smoothness and local linearity of $\Phi(x,a)$ in $a$,
+the average treatment effect corresponds to the first-order
+directional derivative of $\Phi$ along the treatment coordinate,
+averaged over the marginal distribution of $X$.
+
+Higher-order geometry is ignored.
+
+---
+
+## 13. Implications
+
+- Counterfactual existence is not required
+- Positivity violations become structural information
+- Observer feedback can be embedded in $K(s,s')$
+- Effects are directional, not scalar
+
+---
+
+## 14. Closing Perspective
 
 Newtonian mechanics is not wrong.
 It is flat-space physics.
 
-Real-world epidemiology may require curvature.
+Causal inference is not false.
+It is a low-curvature approximation.
+
+Real-world epidemiology may require a geometric view.
