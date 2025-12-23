@@ -264,8 +264,7 @@ rather than estimators of primitive causal forces.
 The g-formula can be written as:
 
 $$
-\mathbb{E}[Y^{\bar a}]
-=
+\mathbb{E}[Y^{\bar a}] =
 \int
 \mathbb{E}[Y \mid \bar A=\bar a, \bar X=\bar x]
 \;
@@ -291,8 +290,7 @@ Marginal structural models estimate parameters using inverse probability
 weights:
 
 $$
-w_i
-=
+w_i =
 \prod_t
 \frac{1}{P(A_t = a_{it} \mid \bar X_{it}, \bar A_{i,t-1})}
 $$
