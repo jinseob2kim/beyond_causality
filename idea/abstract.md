@@ -75,7 +75,7 @@ We propose an analogous shift in epidemiology:
 
 For treatment A in {0,1} and covariates X:
 
-    0 < P(A = 1 | X = x) < 1
+   $$ 0 < P(A = 1 | X = x) < 1 $$
 
 for all x with positive density.
 
@@ -109,7 +109,7 @@ It signals that:
 
 Causal inference assumes:
 
-    "A is a well-defined, repeatable object."
+    " $$A$$ is a well-defined, repeatable object."
 
 In RWD:
 - same drug ≠ same exposure
@@ -118,7 +118,7 @@ In RWD:
 
 Thus:
 
-    A ≠ A
+   $$ A ≠ A $$
 
 This is not measurement error.
 It is conceptual instability.
@@ -129,7 +129,7 @@ It is conceptual instability.
 
 Real systems evolve as:
 
-    X_t -> A_t -> X_{t+1} -> A_{t+1} -> ...
+    $$X_t -> A_t -> X_{t+1} -> A_{t+1} -> ...$$
 
 Treatment and state recursively define each other.
 
@@ -171,7 +171,7 @@ Observer independence quietly collapses.
 
 From:
 
-    "What is the causal effect of A on Y?"
+    "What is the causal effect of $$A$$ on $$Y$$ ?"
 
 To:
 
@@ -185,7 +185,7 @@ To:
 
 Define the system state as:
 
-    S_t = (X_t, A_t)
+    $$S_t = (X_t, A_t)$$
 
 Treatment is a coordinate of the system,
 not an external action.
@@ -196,7 +196,7 @@ not an external action.
 
 Define a risk field over the state space:
 
-    lambda(s) = instantaneous risk density at state s
+    $\lambda(s)$ = instantaneous risk density at state $s$
 
 This can be estimated via:
 - Cox models
@@ -214,7 +214,7 @@ Interpretation differs:
 
 Define a transition kernel:
 
-    P(S_{t+1} = s' | S_t = s) = K(s, s')
+    $$P(S_{t+1} = s' | S_t = s) = K(s, s')$$
 
 This kernel describes system dynamics.
 Zero-probability regions are meaningful, not violations.
@@ -225,26 +225,26 @@ Zero-probability regions are meaningful, not violations.
 
 Instead of:
 
-    do(A = a)
+    $$do(A = a)$$
 
 We define intervention as:
 
-    A : s -> s'
+    $$A : s -> s'$$
 
 An operator that moves the system within the field.
 
 ---
 
-## 7. Potential Function Phi(s)
+## 7. Potential Function $\Phi(s)$
 ### — Information-Geometric Interpretation
 
 Define a potential function over the state space:
 
-    Phi(s) = - log lambda(s)
+    $$\Phi(s) = - \log \lambda(s)$$
 
 or more generally:
 
-    Phi(s) = information cost / entropy density at s
+    $$\Phi(s)$$ = information cost / entropy density at $s$
 
 Properties:
 - High risk regions correspond to low potential
@@ -264,7 +264,7 @@ Classical causal estimands emerge as projections of the field.
 
 The average treatment effect (ATE) corresponds to:
 
-    A contrast between two slices of the field at A = 1 and A = 0,
+    A contrast between two slices of the field at $$A$$ = 1 and $$A$$ = 0,
     averaged over the covariate distribution.
 
 In other words:
