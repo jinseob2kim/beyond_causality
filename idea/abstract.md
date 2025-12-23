@@ -247,13 +247,115 @@ In the field view:
 
 ---
 
-## 10. Relation to MSM and g-formula
+## 10. Relation to MSM and the g-formula (Field-Based Interpretation)
 
-Marginal structural models and g-formulae can be reinterpreted as:
-- attempts to estimate **average flow** along specific field directions
-- under assumptions of smooth connectivity
+Marginal structural models (MSMs) and the g-formula are widely used
+extensions of causal inference designed to handle time-varying treatment
+and confounding in longitudinal real-world data.
 
-Weight explosion reflects **geometric divergence**.
+From a field-based perspective, these methods can be reinterpreted as
+coordinate-dependent projections of an underlying dynamical system,
+rather than estimators of primitive causal forces.
+
+---
+
+### 10.1 The g-formula as an Integrated Flow Over State Space
+
+The g-formula can be written as:
+
+$$
+\mathbb{E}[Y^{\bar a}]
+=
+\int
+\mathbb{E}[Y \mid \bar A=\bar a, \bar X=\bar x]
+\;
+\prod_t
+f(x_t \mid \bar x_{t-1}, \bar a_{t-1})
+\;
+d\bar x
+$$
+
+Conceptually, this corresponds to fixing a treatment regime
+$\bar a = (a_1,\dots,a_T)$ and integrating outcome risk over all admissible
+state trajectories.
+
+From the field perspective, the g-formula computes the expected
+accumulation of local risk along trajectories constrained to follow a
+specific path through the state space.
+
+---
+
+### 10.2 MSMs as Average Projections of Field-Induced Flow
+
+Marginal structural models estimate parameters using inverse probability
+weights:
+
+$$
+w_i
+=
+\prod_t
+\frac{1}{P(A_t = a_{it} \mid \bar X_{it}, \bar A_{i,t-1})}
+$$
+
+These weights rebalance observed trajectories so that treatment appears
+independent of time-varying confounders.
+
+In the field-based view, MSMs estimate the average directional flow of
+the system through the risk field, projected onto the treatment axis.
+
+---
+
+### 10.3 Weight Instability as a Geometric Signal
+
+When positivity is violated, inverse probability weights diverge.
+
+Geometrically, this corresponds to disconnected regions of the state
+space where admissible trajectories do not exist.
+
+Weight explosion is therefore not merely a numerical instability, but
+a signal that the causal projection is being forced across regions with
+no valid geometric connection.
+
+---
+
+### 10.4 Structural Zeroes vs Estimation Failures
+
+In real-world data, treatment assignment is often constrained by:
+
+- clinical guidelines
+- contraindications
+- institutional policies
+- ethical rules
+
+In the field-based framework, these constraints correspond to structural
+boundaries of the state space where the transition kernel is zero.
+
+Such regions define the geometry of the system and should not be treated
+as estimation errors.
+
+---
+
+### 10.5 MSMs and g-formula as Low-Curvature Approximations
+
+When the risk potential is smooth, curvature is low, and the state space
+is well connected, MSMs and the g-formula provide accurate first-order
+summaries.
+
+When curvature, heterogeneity, or structural constraints dominate,
+scalar causal summaries collapse complex geometry into unstable averages.
+
+---
+
+### 10.6 Summary
+
+MSMs and the g-formula are not incorrect.
+They are coordinate-dependent summaries of an underlying risk field,
+valid only under strong geometric regularity assumptions.
+
+The field-based framework clarifies when these methods work, why they
+fail, and what structural information is discarded.
+
+
 
 ---
 
