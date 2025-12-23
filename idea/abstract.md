@@ -164,13 +164,14 @@ Its gradient defines a vector field:
 $$
 \nabla \Phi(s)
 =
-\begin{bmatrix}
-\frac{\partial \Phi}{\partial x_1} \\
-\vdots \\
-\frac{\partial \Phi}{\partial x_p} \\
+\left[
+\frac{\partial \Phi}{\partial x_1},
+\ldots,
+\frac{\partial \Phi}{\partial x_p},
 \frac{\partial \Phi}{\partial a}
-\end{bmatrix}
+\right]
 $$
+
 
 
 This is the **risk-gradient field**.
