@@ -161,16 +161,8 @@ They do not directly generate outcomes.
 $\Phi$ defines a scalar field.
 Its gradient defines a vector field:
 
-$$
-\nabla \Phi(s)
-=
-\left[
-\frac{\partial \Phi}{\partial x_1},
-\ldots,
-\frac{\partial \Phi}{\partial x_p},
-\frac{\partial \Phi}{\partial a}
-\right]
-$$
+$$ \nabla \Phi(s) = \left[ \frac{\partial \Phi}{\partial x_1}, \ldots, \frac{\partial \Phi}{\partial x_p}, \frac{\partial \Phi}{\partial a} \right] $$
+
 
 
 This is the **risk-gradient field**.
