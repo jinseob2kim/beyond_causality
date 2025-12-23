@@ -26,76 +26,227 @@ keywords:
   - treatment effect heterogeneity
   - risk potential field
 abstract: |
-  Standard causal inference methods estimate average treatment effects (ATE) under positivity and no unmeasured confounding assumptions. In real-world data (RWD), structural positivity violations arise from clinical guidelines and contraindications, while treatment effects are often heterogeneous across patient states. We propose Epidynamix, a framework that models health states as points within a Risk Potential Field $\Phi(s) = -\log\lambda(s)$, where treatment effects become directional gradients and positivity violations define structural boundaries. Through simulation, we show that while ATE-based methods (Cox regression, IPTW) collapse effect heterogeneity into scalar summaries, the field-based approach preserves clinically meaningful variation (~4-fold across state space). This geometric perspective offers a complementary lens for RWD analysis, particularly when the standard causal question is structurally unanswerable.
+  Modern causal inference in epidemiology treats interventions as external forces acting on passive subjects to produce average outcomes—a "Newtonian" abstraction that works well in randomized trials but falters in Real-World Data (RWD). In RWD, clinical guidelines create structural positivity violations, treatment decisions are entangled with prognosis, and effects are inherently heterogeneous across patient states. We propose Epidynamix, a framework that shifts focus from "Force" to "Field." By viewing health states as points within a Risk Potential Field $\Phi(s) = -\log\lambda(s)$, we reinterpret causal effects as directional gradients, the ATE as a first-order projection, and positivity violations as structural boundaries—not estimation failures, but geometric features of the clinical landscape. Through simulation, we demonstrate that while standard methods (Cox regression, IPTW) collapse effect heterogeneity into scalar summaries, the field-based approach preserves clinically meaningful variation (~4-fold across state space) and explicitly maps regions where comparison is structurally impossible. This geometric perspective offers a complementary lens for RWD analysis: **a map, not a number.**
 ---
 
-# Introduction
+# Introduction: The Newtonian Discomfort
 
-For decades, causal inference in epidemiology has operated under a "Newtonian" abstraction: treatment $A$ exerts a force on outcome $Y$, producing an Average Treatment Effect (ATE) that we estimate as if it were a universal constant.
+Modern causal inference in epidemiology typically asks:
 
-This framework assumes: (1) interventions are external forces applied to passive subjects; (2) positivity violations are statistical nuisances to be trimmed; and (3) a single scalar (ATE or Hazard Ratio) captures the truth of treatment impact.
+$$
+\text{ATE} = \mathbb{E}[Y(1) - Y(0)]
+$$
 
-**Why now?** The explosion of Real-World Data (RWD)—electronic health records, claims databases, registries—has exposed the limitations of this paradigm. Unlike curated trial populations, RWD reflects the full complexity of clinical practice: treatment decisions are constrained by guidelines, contraindications create structural zeros in the propensity score, and effects vary systematically across patient states. We increasingly face situations where:
+This formulation assumes: well-defined potential outcomes $Y(a)$, interventions acting as external causes, and counterfactual symmetry between $a=0$ and $a=1$. This works extremely well in randomized controlled trials.
+
+However, in Real-World Data (RWD), the system is high-dimensional, time-varying, policy- and guideline-constrained, and observer-influenced. Yet we still model intervention as a force:
+
+$$
+A \;\longrightarrow\; Y
+$$
+
+**Why now?** The explosion of RWD—electronic health records, claims databases, registries—has exposed the limitations of this paradigm. Unlike curated trial populations, RWD reflects the full complexity of clinical practice: treatment decisions are constrained by guidelines, contraindications create structural zeros in the propensity score, and effects vary systematically across patient states [@petersen2012]. We increasingly face situations where:
 
 - Treatment is mandated for high-risk patients (structural positivity violation)
 - The "same" intervention varies by context, timing, and patient state
 - Treatment decisions are entangled with prognosis (confounding by indication)
 
-Traditional methods respond by restricting analysis to "overlap regions" or trimming extreme weights—effectively discarding the very patients for whom treatment decisions matter most [@petersen2012].
+Traditional methods respond by restricting analysis to "overlap regions" or trimming extreme weights—effectively discarding the very patients for whom treatment decisions matter most.
 
 We propose an alternative: **a map, not a number.**
 
 
 # The Geometric Turn: From Force to Field
 
-We propose a fundamental shift: **Causal effects are not primitive forces; they are movements within a structured Field.** We call this framework Epidynamix.
+Einstein did not reinterpret gravity by refining the force. He removed the force. Objects do not respond to gravity—they follow geodesics in a curved spacetime.
 
-## The Risk Potential Field
+We propose an analogous shift:
 
-We define a scalar field over the state space $\mathcal{S}$ of all possible patient conditions, called the Risk Potential:
+- Causal effects are not primitive forces
+- Outcomes arise from motion within a structured field
+- Interventions reposition systems inside that field
+
+
+## Notation
+
+Throughout this paper, we use the following conventions:
+
+| Symbol | Meaning |
+|--------|---------|
+| $S_t = (X_t, A_t)$ | System state at time $t$ |
+| $\mathcal{S}$ | State space |
+| $\lambda(s)$ | Instantaneous hazard at state $s$ |
+| $\Phi(s)$ | Risk potential function |
+| $\nabla \Phi$ | Gradient (for continuous variables) |
+| $\delta_A \Phi(x)$ | Finite difference for binary $A$: $\Phi(x,1) - \Phi(x,0)$ |
+| $K(s, s')$ | Transition kernel |
+| $\mathcal{I}_a$ | Intervention operator |
+
+**Note on binary treatment:** When $A \in \{0, 1\}$, expressions like $\partial \Phi / \partial a$ should be understood as the finite difference $\delta_A \Phi$, not a true derivative.
+
+
+# State Space and Risk Field
+
+## State Definition
+
+We define the system state as:
 
 $$
-\Phi(s) = -\log(\lambda(s))
+S_t = (X_t, A_t) \in \mathcal{S}
 $$
 
-where $\lambda(s)$ is the instantaneous hazard at state $s$. In this field, "safety" is high ground (peaks), and "danger" is low ground (valleys).
-
-## Intervention as State-Transition
-
-An intervention is not a force applied to a static object. It is an operator $\mathcal{I}_a$ that moves a patient from one coordinate in state space to another. For binary treatment, the effect is:
+where treatment $A_t$ is a coordinate of the system, not an external action. The system evolves according to a transition kernel:
 
 $$
-\delta_A \Phi(x) = \Phi(x, A=1) - \Phi(x, A=0)
+P(S_{t+1} \mid S_t) = K(S_t, S_{t+1})
 $$
 
-The ATE is simply the population average of this local effect:
+Regions where $K$ assigns zero probability are **structural**, not violations.
+
+
+## Risk Potential Function
+
+Define a local risk field:
+
+$$
+\lambda(s) = \lim_{\Delta t \to 0} \frac{P(T \in [t, t+\Delta t) \mid S_t = s)}{\Delta t}
+$$
+
+This is estimable using standard survival models. We then define the risk potential:
+
+$$
+\Phi(s) = -\log \lambda(s)
+$$
+
+Interpretation: low $\Phi$ → high risk; high $\Phi$ → relative stability. $\Phi$ is not an outcome—it is a **geometric property of the state space**.
+
+
+## Time Treatment
+
+In this framework, we treat $\Phi(s)$ as either:
+
+1. **Landmark approach:** Evaluated at a fixed reference time $t^*$
+2. **Stationary assumption:** Time-invariant for a given state
+3. **Cumulative formulation:** Integrated over a horizon $[0, \tau]$
+
+For the examples in this paper, we adopt the **stationary assumption** for simplicity.
+
+
+## $\Phi$ as a Lyapunov-like Function
+
+In many RWD systems, events occur preferentially along trajectories where:
+
+$$
+\mathbb{E}[\Phi(S_{t+1}) \mid S_t = s] \le \Phi(s)
+$$
+
+Thus, $\Phi$ behaves as a **stochastic Lyapunov-like function**: not strictly decreasing, but directionally aligned with instability and event occurrence.
+
+
+# Intervention as a Transition Operator
+
+Instead of a do-operator $\text{do}(A=a)$, we define intervention as a state transformation:
+
+$$
+\mathcal{I}_a : \mathcal{S} \to \mathcal{S}, \quad \mathcal{I}_a(x,a') = (x,a)
+$$
+
+Interventions move the system across the field. They do not directly generate outcomes.
+
+
+# Vector Field Interpretation
+
+## Gradient of the Potential
+
+$\Phi$ defines a scalar field on $\mathcal{S}$. Its gradient defines a **vector field**:
+
+$$
+\nabla \Phi(s) = \left( \frac{\partial \Phi}{\partial x_1}, \ldots, \frac{\partial \Phi}{\partial x_p}, \frac{\partial \Phi}{\partial a} \right)
+$$
+
+This **risk-gradient field** encodes directions of maximal risk increase and local instability structure.
+
+**Connection to Cox regression:** In the Cox model, $\log \lambda(s) = \log h_0(t) + \beta' s$. Since $\Phi = -\log \lambda$, we have $\nabla_x \Phi = -\beta$ (independent of baseline hazard $h_0$). The field framework generalizes this to nonlinear $\Phi(s)$.
+
+
+## Directional Effects as Local Geometry
+
+An intervention induces a local displacement $\Delta s = (0,\ldots,0,\Delta a)$. The induced change in potential is:
+
+$$
+\Delta \Phi \approx \nabla \Phi(s) \cdot \Delta s
+$$
+
+Definitions:
+
+- **Risk-increasing effect:** $\Delta \Phi < 0$
+- **Protective effect:** $\Delta \Phi > 0$
+
+These effects are local, state-dependent, and directional. They are **not global scalar quantities**.
+
+
+# ATE as a First-Order Projection
+
+The true object is the field $\Phi(x,a)$.
+
+**For binary treatment** $A \in \{0,1\}$, the treatment effect is exactly the finite difference:
+
+$$
+\delta_A \Phi(x) = \Phi(x, 1) - \Phi(x, 0)
+$$
+
+Averaging over $X$ yields the ATE:
 
 $$
 \text{ATE} = \mathbb{E}_X[\delta_A \Phi(X)]
 $$
 
-This average is information-preserving only when $\text{Var}_X[\delta_A \Phi] \approx 0$. When effects vary across patient states, the ATE collapses a rich distribution into a single number.
+**ATE is a first-order projection of a high-dimensional geometry.**
+
+**Case 1: Homogeneous effects** ($\text{Var}_X[\delta_A \Phi] \approx 0$)
+
+When $\delta_A \Phi(x) \approx c$ (constant across $x$), ATE $\approx c$. No information is lost.
+
+**Case 2: Heterogeneous effects** ($\text{Var}_X[\delta_A \Phi]$ large)
+
+ATE remains well-defined but collapses a distribution into a single number, losing information about where effects are strong vs weak, positive vs negative.
+
+**Case 3: Positivity violation** (structural discontinuity)
+
+When $P(A = 0 \mid X = x) = 0$ for some $x$, the field $\Phi(x, 0)$ is undefined in that region. ATE involves integration over regions where $\Phi(x, 0)$ does not exist. This is not an estimation problem—it is a **domain problem**.
 
 
-# Positivity Violations as Structural Boundaries
+# Positivity Reinterpreted Geometrically
 
-In standard causal inference, if a subgroup always receives treatment ($P(A=1|X) = 1$), we call it a positivity violation—a statistical problem to fix.
+Standard positivity requires $0 < P(A=1 \mid X=x) < 1$.
 
-In the Epidynamix framework, this is a **Structural Cliff**: a boundary where the untreated state is forbidden by ethics, guidelines, or biological reality. Rather than treating these as estimation failures, we map them as the defining edges of the clinical landscape.
+In the field view: positivity violations correspond to **disconnected regions** of $\mathcal{S}$—geometric constraints, not estimation failures. Rather than treating these as problems to fix, we map them as the defining boundaries of the clinical landscape.
+
+
+# Relation to MSM and the g-formula
+
+## The g-formula as Integrated Flow
+
+The g-formula computes the expected accumulation of local risk along trajectories constrained to follow a specific path through state space.
+
+## MSMs as Average Projections
+
+MSMs estimate the average directional flow of the system through the risk field, projected onto the treatment axis [@cole2008].
+
+## Weight Instability as a Geometric Signal
+
+When positivity is violated, inverse probability weights diverge. Geometrically, this corresponds to disconnected regions where admissible trajectories do not exist. Weight explosion is a signal that the causal projection is being forced across regions with no valid geometric connection.
 
 
 # Simulation Study
 
-To demonstrate the Field approach, we simulated a clinical scenario with a structural boundary and heterogeneous effects.
-
-**Setup:**
+We simulated a 2D state space with survival outcomes:
 
 - $X_1$: Systolic blood pressure (100–200 mmHg)
 - $X_2$: Inflammatory marker (0–10 mg/L)
-- $A$: Antihypertensive treatment (binary)
+- $A$: Binary treatment (antihypertensive)
 - Structural constraint: If $X_1 > 160$, then $A = 1$ (mandatory per guideline)
-
-Treatment benefit was designed to increase with $X_1$.
+- Heterogeneous effect: Treatment benefit increases with $X_1$
 
 **Results (N = 3,000):**
 
@@ -105,44 +256,50 @@ Treatment benefit was designed to increase with $X_1$.
 | IPTW ATE | 0.20 | Treatment increases 1-year survival by 20 percentage points |
 | Field $\delta_A \Phi$ | 0.42–1.66 | Effect varies 4-fold across state space |
 
-Traditional methods produce single numbers. The Field approach reveals that treatment benefit varies ~4-fold across the state space, with the largest effects in high-BP patients—precisely those for whom the guideline mandates treatment [@cole2008]. The region $X_1 > 160$ is not a failure; it is a Structural Cliff revealing clinical logic.
+Traditional methods produce single numbers. The Field approach reveals that treatment benefit varies ~4-fold across the state space, with the largest effects in high-BP patients—precisely those for whom the guideline mandates treatment.
 
 ![Treatment effect field showing heterogeneity and structural boundary at $X_1 > 160$. Gray region indicates positivity violation where comparison is structurally impossible.](fig_field_approach.png){#fig-field width="90%"}
 
+**Key Messages:**
 
-# Relation to Existing Approaches
+1. Traditional methods are not wrong—Cox and IPTW correctly estimate average effects
+2. But averages hide structure—HR = 0.55 does not reveal 4-fold variation
+3. Positivity violation is information—the gray zone reflects clinical logic
+4. Field-based output is a map, not a number
+
+
+# Relation to Existing Heterogeneity Research
 
 ## Differentiation from CATE
 
-Conditional Average Treatment Effect (CATE) estimation—via causal forests [@wager2018], meta-learners, or Bayesian methods—also addresses heterogeneity. The difference lies in the question asked:
+| Aspect | CATE / HTE Research | Epidynamix |
+|--------|---------------------|------------|
+| Core question | "What is the effect for subgroup $X=x$?" | "What is the structure of the risk field?" |
+| Output | $\tau(x) = \mathbb{E}[Y(1) - Y(0) \mid X=x]$ | $\Phi(s)$, $\nabla \Phi$, structural boundaries |
+| Positivity violation | Estimation problem (trim, extrapolate) | **Information** (map the boundary) |
+| Counterfactuals | Required | Not required |
+| Goal | Better effect estimation | Different question entirely |
 
-| Aspect | CATE | Epidynamix |
-|--------|------|------------|
-| Question | What is the effect for subgroup $X=x$? | What is the structure of the risk landscape? |
-| Positivity | Estimation problem | Structural information |
-| Counterfactuals | Required | Not required in boundary regions |
-| Output | $\tau(x)$ | $\Phi(s)$, gradients, boundaries |
-
-CATE asks "what is the effect?"—conditional on covariates. Epidynamix asks "what does the landscape look like, and where can we not go?" Crucially, CATE treats positivity violations as missing data; Epidynamix reports boundaries explicitly as part of the result.
+**Key distinction:** CATE still asks "what is the effect?"—just conditional on $X$ [@wager2018]. Epidynamix asks "what does the risk landscape look like, and where can we not go?" Crucially, CATE treats positivity violations as missing data; Epidynamix reports boundaries explicitly as part of the result.
 
 ## Connection to Structural Nested Models
 
-The local effect $\delta_A \Phi(x)$ shares conceptual ground with the "blip function" in Structural Nested Mean Models (SNMM) [@robins1994], which also models treatment effects as functions of patient state. The key difference is interpretive: SNMM aims to estimate causal effects under sequential exchangeability, while Epidynamix treats the effect surface as a geometric object to be mapped, with boundaries as informative features rather than obstacles.
+The local effect $\delta_A \Phi(x)$ shares conceptual ground with the "blip function" in Structural Nested Mean Models [@robins1994], which also models treatment effects as functions of patient state. The key difference is interpretive: SNMM aims to estimate causal effects under sequential exchangeability, while Epidynamix treats the effect surface as a geometric object to be mapped.
 
 ## Novelty Claim
 
-We do not claim to invent new mathematics. Potential landscapes exist in physics and systems biology (e.g., Waddington's epigenetic landscape [@waddington1957]). Our contribution is applying this lens to clinical RWD, where positivity violations are common, effects are entangled with state, and the average-effect question may be structurally unanswerable.
+We do not claim to invent new mathematics. Potential landscapes exist in physics and systems biology (e.g., Waddington's epigenetic landscape [@waddington1957]). Concurrent work by Leizerman [@leizerman2025] develops a "Unified Causal Field Theory" using differential geometry and fiber bundles—a more general mathematical formalization applicable across domains. Our contribution is complementary: applying this geometric lens specifically to clinical RWD, where positivity violations are common, effects are entangled with state, and the average-effect question may be structurally unanswerable.
 
-This is a reinterpretation, not an invention—a new language for an old problem.
+This is a **reinterpretation**, not an invention—a new language for an old problem.
 
 
 # Discussion
 
 The Epidynamix framework offers a complementary perspective to standard causal inference [@rubin1974; @hernan2020]. It does not replace existing methods; rather, it clarifies their domain of validity.
 
-**When ATE works:** If the risk field is smooth, low-curvature, and well-connected (positivity holds everywhere), the ATE is an accurate summary. Traditional methods excel here.
+**When ATE works:** If the risk field is smooth, low-curvature, and well-connected (positivity holds everywhere), the ATE is an accurate summary.
 
-**When ATE fails:** If effects are highly heterogeneous, or if structural constraints create disconnected regions [@petersen2012], the ATE may be misleading or undefined. The field approach provides richer output—a map rather than a number.
+**When ATE fails:** If effects are highly heterogeneous, or if structural constraints create disconnected regions, the ATE may be misleading or undefined. The field approach provides richer output—a map rather than a number.
 
 **Practical implications:**
 
@@ -151,12 +308,13 @@ The Epidynamix framework offers a complementary perspective to standard causal i
 3. Treat positivity violations as findings, not errors
 4. Consider whether the causal question is answerable before estimating
 
-**Limitations:** The framework is conceptual; practical estimation of $\Phi(s)$ requires flexible models and careful validation. Extension to time-varying treatments and high-dimensional states remains an open challenge.
+**Limitations:** The framework is conceptual; practical estimation of $\Phi(s)$ requires flexible models (e.g., GAMs, neural networks) and careful validation. Extension to time-varying treatments and high-dimensional states remains an open challenge.
 
 
 # Conclusion
 
-Newtonian mechanics is not wrong—it is flat-space physics. Causal inference is not false—it is a low-curvature approximation.
+Newtonian mechanics is not wrong—it is flat-space physics.
+Causal inference is not false—it is a low-curvature approximation.
 
 Real-world epidemiology, with its structural constraints and heterogeneous effects, may require a geometric view. The Epidynamix framework offers one such lens: treating causal effects not as forces, but as directional movements within a structured risk field.
 

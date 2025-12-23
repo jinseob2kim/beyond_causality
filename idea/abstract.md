@@ -532,7 +532,11 @@ Epidynamix asks "what does the risk landscape look like, and where can we not go
 We do not claim to invent new mathematics. Potential landscapes, dynamical systems,
 and information geometry exist in physics and theoretical biology.
 
-Our contribution is **applying this lens to clinical RWD**, where:
+Concurrent work by Leizerman (2025) develops a "Unified Causal Field Theory" using
+differential geometry and fiber bundles—a more general mathematical formalization
+applicable across domains. [Available at: https://osf.io/download/68805ae08cbd2c498f1f63d8/]
+
+Our contribution is **complementary**: applying this geometric lens specifically to clinical RWD, where:
 - Positivity violations are common (guidelines, contraindications)
 - Treatment effects are entangled with state (confounding by indication)
 - The "average effect" question may be structurally unanswerable
