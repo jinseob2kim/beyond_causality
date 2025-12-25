@@ -121,7 +121,7 @@ p1 <- ggplot(grid, aes(X1, X2)) +
     title = "Treatment Effect Field",
     subtitle = paste0("Cox HR = ", round(hr, 2), " / IPTW ATE = ", round(ate, 2), " (single numbers) vs Field shows structure"),
     x = "SBP (X1)", y = "CRP (X2)",
-    fill = expression(delta[A]*Phi)
+    fill = expression(Delta[A]*Phi)
   ) +
   theme_clean
 
@@ -141,7 +141,7 @@ p2 <- ggplot(dt_valid, aes(x = X1, y = -ITE_est)) +  # 부호 맞춤
   labs(
     title = "Effect Gradient by SBP",
     subtitle = "Treatment benefit increases with blood pressure",
-    x = "SBP (X1)", y = expression(delta[A]*Phi ~ "(treatment benefit)")
+    x = "SBP (X1)", y = expression(Delta[A]*Phi ~ "(treatment benefit)")
   ) +
   theme_clean
 

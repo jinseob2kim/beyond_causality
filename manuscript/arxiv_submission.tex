@@ -197,31 +197,29 @@ violation, treatment effect heterogeneity, risk potential field},
 \begin{document}
 \maketitle
 \begin{abstract}
-Modern causal inference in epidemiology treats interventions as external
-forces acting on passive subjects to produce average outcomes---a
-``Newtonian'' abstraction that works well in randomized trials but
-falters in Real-World Data (RWD). In RWD, clinical guidelines create
-structural positivity violations, treatment decisions are entangled with
-prognosis, and effects are inherently heterogeneous across patient
-states. We propose Epidynamix, a framework that shifts focus from
-``Force'' to ``Field.'' By viewing health states as points within a Risk
-Potential Field \(\Phi(s) = -\log\lambda(s)\), we reinterpret causal
-effects as directional gradients, the ATE as a first-order projection,
-and positivity violations as structural boundaries---not estimation
-failures, but geometric features of the clinical landscape. Through
-simulation, we demonstrate that while standard methods (Cox regression,
-IPTW) collapse effect heterogeneity into scalar summaries, the
-field-based approach preserves clinically meaningful variation
-(\textasciitilde3.5-fold across state space) and explicitly maps regions
-where comparison is structurally impossible. This geometric perspective
-offers a complementary lens for RWD analysis: \textbf{a map, not a
-number.}
+Standard causal inference methods estimate average treatment
+effects---scalars that work well when effects are homogeneous and
+positivity holds. In Real-World Data (RWD), however, clinical guidelines
+create structural positivity violations, and effects vary systematically
+across patient states. We propose Epidynamix, a complementary output
+format that maps treatment effect heterogeneity explicitly. Defining a
+Risk Potential Field \(\Phi_a(x) = -\log\lambda(x,a)\) for each
+treatment regime, we compute the effect surface
+\(\Delta_A\Phi(x) = \Phi_1(x) - \Phi_0(x)\)---mathematically equivalent
+to CATE on the log-hazard scale. The key difference is interpretive:
+positivity violations become structural boundaries to report, not
+estimation failures to fix. Through simulation, we show that while Cox
+regression and IPTW yield valid averages (HR = 0.55), the effect surface
+reveals \textasciitilde3.5-fold variation across state space, with the
+largest benefits in high-risk patients where guidelines mandate
+treatment. This reframing does not replace causal inference but enriches
+its output: \textbf{a map, not just a number.}
 \end{abstract}
 
 
 \setstretch{1.5}
-\section{Introduction: The Newtonian
-Discomfort}\label{introduction-the-newtonian-discomfort}
+\section{Introduction: When Averages Are Not
+Enough}\label{introduction-when-averages-are-not-enough}
 
 Modern causal inference in epidemiology typically asks:
 
@@ -271,25 +269,34 @@ We propose an alternative: \textbf{a map, not a number.}
 \section{The Geometric Turn: From Force to
 Field}\label{the-geometric-turn-from-force-to-field}
 
-Einstein did not reinterpret gravity by refining the force. He removed
-the force. Objects do not respond to gravity---they follow geodesics in
-a curved spacetime.
+Physics offers a useful analogy. In Newtonian mechanics, gravity is a
+force acting between masses. In general relativity, gravity emerges from
+the geometry of spacetime---objects follow geodesics in a curved
+manifold. This is not merely a notational change; it enabled new
+predictions (light bending, gravitational waves).
 
-We propose an analogous shift:
+We propose a \emph{conceptual reframing}, not a paradigm shift of equal
+magnitude. The analogy is motivational, not literal:
 
 \begin{itemize}
 \tightlist
 \item
-  Causal effects are not primitive forces
+  View treatment effects as properties of a structured state space
 \item
-  Outcomes arise from motion within a structured field
+  Represent heterogeneity as geometry rather than residual variance
 \item
-  Interventions reposition systems inside that field
+  Treat structural constraints as boundaries to be mapped, not
+  estimation failures
 \end{itemize}
+
+This reframing does not generate new predictions from the same data. Its
+value lies in changing \emph{what we report}: a map of effect
+heterogeneity and structural boundaries, rather than a single number.
 
 \subsection{Notation}\label{notation}
 
-Throughout this paper, we use the following conventions:
+Throughout this paper, we use the following conventions (discrete
+treatment):
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.4706}}
@@ -304,174 +311,175 @@ Meaning
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\(S_t = (X_t, A_t)\) & System state at time \(t\) \\
-\(\mathcal{S}\) & State space \\
-\(\lambda(s)\) & Instantaneous hazard at state \(s\) \\
-\(\Phi(s)\) & Risk potential function \\
-\(\nabla \Phi\) & Gradient (for continuous variables) \\
-\(\delta_A \Phi(x)\) & Finite difference for binary \(A\):
-\(\Phi(x,1) - \Phi(x,0)\) \\
-\(K(s, s')\) & Transition kernel \\
-\(\mathcal{I}_a\) & Intervention operator \\
+\(S_t = X_t\) & System state (covariates) at time \(t\) \\
+\(\mathcal{S}\) & State space for \(X\) \\
+\(\lambda(x, a, t)\) & Instantaneous hazard at state \(x\) under \(a\)
+at time \(t\) \\
+\(\Phi_a(x)\) & Risk potential under regime \(a\in\{0,1\}\):
+\(-\log \lambda(x,a, t^*)\) or cumulative variant \\
+\(\nabla_x \Phi_a\) & Gradient w.r.t. continuous covariates \(x\) (no
+derivative in \(a\)) \\
+\(\Delta_A \Phi(x)\) & Finite difference across regimes:
+\(\Phi_1(x) - \Phi_0(x)\) \\
+\(K_a(x_t, x_{t+1})\) & Transition kernel conditional on \(a_t\) \\
+\(\mathcal{I}_a\) & Regime selection: \(x \mapsto \Phi_a(x)\) \\
 \end{longtable}
 
-\textbf{Note on binary treatment:} When \(A \in \{0, 1\}\), expressions
-like \(\partial \Phi / \partial a\) should be understood as the finite
-difference \(\delta_A \Phi\), not a true derivative.
+Notes: - We treat \(a\) as a regime index, not as a coordinate of the
+state. For binary \(a\), treatment-axis changes use finite differences
+\(\Delta_A \Phi\) rather than derivatives. - Time handling is made
+explicit via \(t\) or a chosen reference \(t^*\) (see Time Treatment).
 
 \section{State Space and Risk Field}\label{state-space-and-risk-field}
 
 \subsection{State Definition}\label{state-definition}
 
-We define the system state as:
+We define the observable system state as covariates only:
 
 \[
-S_t = (X_t, A_t) \in \mathcal{S}
+S_t = X_t \in \mathcal{S}.
 \]
 
-where treatment \(A_t\) is a coordinate of the system, not an external
-action. The system evolves according to a transition kernel:
+Treatment \(A_t\) is a regime index applied to the system, not a
+coordinate of \(X_t\). The dynamics of covariates can depend on
+treatment via a treatment-specific transition kernel:
 
 \[
-P(S_{t+1} \mid S_t) = K(S_t, S_{t+1})
+P(X_{t+1} \mid X_t, A_t=a) = K_a(X_t, X_{t+1}).
 \]
 
-Regions where \(K\) assigns zero probability are \textbf{structural},
-not violations.
+Regions where \(K_a\) assigns zero probability are \textbf{structural}
+(e.g., guideline-constrained), not estimation failures.
 
 \subsection{Risk Potential Function}\label{risk-potential-function}
 
-Define a local risk field:
+Define a local hazard field \(\lambda(x,a,t)\) and the corresponding
+potential:
 
 \[
-\lambda(s) = \lim_{\Delta t \to 0} \frac{P(T \in [t, t+\Delta t) \mid S_t = s)}{\Delta t}
+\Phi_a(x) = -\log\lambda(x,a,t^*)\quad\text{(landmark)}\qquad \text{or}\qquad \Phi_a(x) = -\log\int_0^\tau \lambda(x,a,t)\,dt\;\text{(cumulative)}.
 \]
 
-This is estimable using standard survival models. We then define the
-risk potential:
-
-\[
-\Phi(s) = -\log \lambda(s)
-\]
-
-Interpretation: low \(\Phi\) → high risk; high \(\Phi\) → relative
-stability. \(\Phi\) is not an outcome---it is a \textbf{geometric
-property of the state space}.
+Interpretation: low \(\Phi_a\) → high risk; high \(\Phi_a\) → relative
+stability. \(\Phi_a\) is a \textbf{geometric property of the state space
+under regime \(a\)}.
 
 \subsection{Time Treatment}\label{time-treatment}
 
-In this framework, we treat \(\Phi(s)\) as either:
+RWD hazards are typically time-varying. We use one of:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \textbf{Landmark approach:} Evaluated at a fixed reference time
-  \(t^*\)
+  Landmark: \(\Phi_a(x) := -\log \lambda(x,a, t^*)\) at a clinically
+  meaningful \(t^*\)
 \item
-  \textbf{Stationary assumption:} Time-invariant for a given state
+  Discrete-time: estimate \(\lambda_t(x,a)\) on bins
+  \(t\in\{1,\dots,T\}\) and summarize \(\Phi_{a,t}(x)\)
 \item
-  \textbf{Cumulative formulation:} Integrated over a horizon
-  \([0, \tau]\)
+  Cumulative: \(\Phi_a(x) := -\log \int_0^\tau \lambda(x,a,t)\,dt\)
 \end{enumerate}
 
-For the examples in this paper, we adopt the \textbf{stationary
-assumption} for simplicity.
+Examples use (1) for simplicity. For applied analyses, we recommend (1)
+or (2), reporting \(t\) explicitly and avoiding a global stationarity
+assumption.
 
-In non-stationary hazard settings, consider landmark or time-specific
-fields, or a cumulative definition of risk potential over \([0, \tau]\).
+\section{Intervention as Regime
+Selection}\label{intervention-as-regime-selection}
 
-\section{Intervention as a Transition
-Operator}\label{intervention-as-a-transition-operator}
-
-Instead of a do-operator \(\text{do}(A=a)\), we define intervention as a
-state transformation:
+Instead of viewing \(\text{do}(A=a)\) as an external force, we treat
+intervention as selecting which potential surface to evaluate:
 
 \[
-\mathcal{I}_a : \mathcal{S} \to \mathcal{S}, \quad \mathcal{I}_a(x,a') = (x,a)
+\mathcal{I}_a : x \mapsto \Phi_a(x).
 \]
 
-Interventions move the system across the field. They do not directly
-generate outcomes.
+This is not a state transformation but a regime selection---choosing
+which of the two surfaces \(\{\Phi_0, \Phi_1\}\) applies to a given
+covariate configuration \(x\).
 
 \section{Vector Field Interpretation}\label{vector-field-interpretation}
 
 \subsection{Gradient of the Potential}\label{gradient-of-the-potential}
 
-\(\Phi\) defines a scalar field on \(\mathcal{S}\). Its gradient defines
-a \textbf{vector field}:
+Each \(\Phi_a(x)\) defines a scalar field on \(\mathcal{S}\). Its
+spatial gradient defines a \textbf{vector field} over \(x\):
 
 \[
-\nabla \Phi(s) = \left( \frac{\partial \Phi}{\partial x_1}, \ldots, \frac{\partial \Phi}{\partial x_p}, \frac{\partial \Phi}{\partial a} \right)
+\nabla_x \Phi_a(x) = \left( \frac{\partial \Phi_a}{\partial x_1}, \ldots, \frac{\partial \Phi_a}{\partial x_p} \right).
 \]
 
-This \textbf{risk-gradient field} encodes directions of maximal risk
-increase and local instability structure. For binary treatment,
-interpret the treatment axis as finite differences \(\delta_A \Phi\)
-rather than a true derivative.
+For binary treatment, changes across \(a\) use the finite difference
+\(\Delta_A\Phi(x) = \Phi_1(x) - \Phi_0(x)\); no derivative in \(a\) is
+implied.
 
-\textbf{Connection to Cox regression:} In the Cox model,
-\(\log \lambda(s) = \log h_0(t) + \beta' s\). Since
-\(\Phi = -\log \lambda\), we have \(\nabla_x \Phi = -\beta\)
-(independent of baseline hazard \(h_0\)). The field framework
-generalizes this to nonlinear \(\Phi(s)\).
+\textbf{Connection to Cox regression:} In a log-linear Cox model,
+\(\log \lambda(x,a,t)=\log h_0(t)+\beta_x' x + \beta_A a\), so
+\(\nabla_x \Phi_a(x) = -\beta_x\). The field framework generalizes this
+to nonlinear \(\Phi_a(x)\).
 
-\subsection{Directional Effects as Local
-Geometry}\label{directional-effects-as-local-geometry}
+\subsection{Treatment Contrast as Surface
+Difference}\label{treatment-contrast-as-surface-difference}
 
-An intervention induces a local displacement
-\(\Delta s = (0,\ldots,0,\Delta a)\). The induced change in potential
-is:
+For a given covariate configuration \(x\), the treatment effect is the
+difference between the two potential surfaces:
 
 \[
-\Delta \Phi \approx \nabla \Phi(s) \cdot \Delta s
+\Delta_A \Phi(x) = \Phi_1(x) - \Phi_0(x).
 \]
 
-Definitions:
+Interpretation:
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Risk-increasing effect:} \(\Delta \Phi < 0\)
+  \textbf{Protective effect:} \(\Delta_A \Phi(x) > 0\) (treatment lowers
+  hazard)
 \item
-  \textbf{Protective effect:} \(\Delta \Phi > 0\)
+  \textbf{Harmful effect:} \(\Delta_A \Phi(x) < 0\) (treatment increases
+  hazard)
 \end{itemize}
 
-These effects are local, state-dependent, and directional. They are
-\textbf{not global scalar quantities}.
+This effect varies across \(x\)---it is a surface, not a scalar. The
+spatial gradient \(\nabla_x \Phi_a\) describes how risk changes with
+covariates within a fixed regime.
 
 \section{ATE as a First-Order
 Projection}\label{ate-as-a-first-order-projection}
 
-The true object is the field \(\Phi(x,a)\).
+The true objects are the potential surfaces \(\Phi_0(x)\) and
+\(\Phi_1(x)\).
 
-\textbf{For binary treatment} \(A \in \{0,1\}\), the treatment effect is
-exactly the finite difference:
+\textbf{For binary treatment} \(A \in \{0,1\}\), the treatment-contrast
+surface is:
 
 \[
-\delta_A \Phi(x) = \Phi(x, 1) - \Phi(x, 0)
+\Delta_A \Phi(x) = \Phi_1(x) - \Phi_0(x).
 \]
 
 Averaging over \(X\) yields the ATE:
 
 \[
-\text{ATE} = \mathbb{E}_X[\delta_A \Phi(X)]
+\text{ATE} = \mathbb{E}_X[\Delta_A \Phi(X)].
 \]
 
-\textbf{ATE is a first-order projection of a high-dimensional geometry.}
+On the survival scale,
+\(\Delta_A \Phi(x) = \log\{\lambda(x,0)/\lambda(x,1)\}\) is the log
+hazard-ratio field; the HR field is \(\exp\{-\Delta_A \Phi(x)\}\).
 
-\textbf{Survival scale note:} For survival outcomes,
-\(\delta_A \Phi(x) = \Phi(x,1) - \Phi(x,0) = \log\{\lambda(x,0)/\lambda(x,1)\}\)
-is the negative log hazard ratio. The HR field is
-\(\exp\{-\delta_A \Phi(x)\}\).
+Identification requires (i) exchangeability \(Y^a \perp A \mid X\) and
+(ii) positivity on the target domain. Where positivity fails,
+\(\Phi_0(x)\) or \(\Phi_1(x)\) is undefined, and \(\Delta_A\Phi(x)\) is
+not identified---these regions are reported as structural boundaries.
 
 \textbf{Case 1: Homogeneous effects}
-(\(\text{Var}_X[\delta_A \Phi] \approx 0\))
+(\(\text{Var}_X[\Delta_A \Phi] \approx 0\))
 
-When \(\delta_A \Phi(x) \approx c\) (constant across \(x\)), ATE
+When \(\Delta_A \Phi(x) \approx c\) (constant across \(x\)), ATE
 \(\approx c\). No information is lost.
 
-\textbf{Case 2: Heterogeneous effects} (\(\text{Var}_X[\delta_A \Phi]\)
+\textbf{Case 2: Heterogeneous effects} (\(\text{Var}_X[\Delta_A \Phi]\)
 large)
 
 ATE remains well-defined but collapses a distribution into a single
@@ -480,21 +488,21 @@ positive vs negative.
 
 \textbf{Case 3: Positivity violation} (structural discontinuity)
 
-When \(P(A = 0 \mid X = x) = 0\) for some \(x\), the field
-\(\Phi(x, 0)\) is undefined in that region. ATE involves integration
-over regions where \(\Phi(x, 0)\) does not exist. This is not an
-estimation problem---it is a \textbf{domain problem}.
+When \(P(A = 0 \mid X = x) = 0\) for some \(x\), the surface
+\(\Phi_0(x)\) is undefined in that region. ATE involves integration over
+regions where \(\Phi_0(x)\) does not exist. This is not an estimation
+problem---it is a \textbf{domain problem}.
 
-\section{Positivity Reinterpreted
-Geometrically}\label{positivity-reinterpreted-geometrically}
+\section{Identification and
+Positivity}\label{identification-and-positivity}
 
-Standard positivity requires \(0 < P(A=1 \mid X=x) < 1\).
-
-In the field view: positivity violations correspond to
-\textbf{disconnected regions} of \(\mathcal{S}\)---geometric
-constraints, not estimation failures. Rather than treating these as
-problems to fix, we map them as the defining boundaries of the clinical
-landscape.
+We do not avoid counterfactual reasoning; we avoid unnecessary notation.
+Estimation of \(\Phi_a(x)\) and \(\Delta_A\Phi(x)\) still relies on
+exchangeability and positivity on the support of \(X\). Where
+\(P(A=a\mid X=x)=0\), \(\Phi_a(x)\) is not defined---this is a domain
+issue. In the field view, such regions are \textbf{disconnected} parts
+of \(\mathcal{S}\) and are mapped as structural boundaries rather than
+imputed.
 
 \section{Relation to MSM and the
 g-formula}\label{relation-to-msm-and-the-g-formula}
@@ -541,15 +549,16 @@ We simulated a 2D state space with survival outcomes:
 
 \textbf{Estimation notes:} We enforce the structural rule
 \(X_1 > 160 \Rightarrow A = 1\) deterministically to induce a structural
-positivity boundary. We estimate the hazard surface \(\hat{\lambda}(s)\)
-using generalized additive models (GAMs) with tensor product smooths,
-fitting separate surfaces for \(A=0\) and \(A=1\). From these, we obtain
-\(\hat{\Phi}(s) = -\log \hat{\lambda}(s)\) and compute
-\(\delta_A \Phi(x) = \hat{\Phi}(x,1) - \hat{\Phi}(x,0)\). We report both
-\(\delta_A \Phi\) and the HR field \(\exp\{-\delta_A \Phi\}\).
+positivity boundary. We estimate the hazard surfaces
+\(\hat{\lambda}(x,a)\) using generalized additive models (GAMs) with
+tensor product smooths, fitting separate surfaces for \(A=0\) and
+\(A=1\). From these, we obtain
+\(\hat{\Phi}_a(x) = -\log \hat{\lambda}(x,a)\) and compute
+\(\Delta_A \Phi(x) = \hat{\Phi}_1(x) - \hat{\Phi}_0(x)\). We report both
+\(\Delta_A \Phi\) and the HR field \(\exp\{-\Delta_A \Phi\}\).
 Visualization is restricted to regions with empirical support;
 disconnected regions (no joint support for both \(A=0\) and \(A=1\)) are
-rendered as boundaries where \(\delta_A \Phi\) is undefined. Alternative
+rendered as boundaries where \(\Delta_A \Phi\) is undefined. Alternative
 estimators (e.g., neural networks, random survival forests) could be
 substituted; the conceptual framework does not depend on a specific
 method.
@@ -575,7 +584,7 @@ Interpretation
 Cox HR & 0.55 & Treatment reduces hazard by 45\% \\
 IPTW ATE & 0.20 & Treatment increases 1-year survival by 20 percentage
 points \\
-HR field \(\exp(-\delta_A \Phi)\) & 0.19--0.66 & Effect varies
+HR field \(\exp(-\Delta_A \Phi)\) & 0.19--0.66 & Effect varies
 \textasciitilde3.5-fold across state space \\
 \end{longtable}
 
@@ -610,11 +619,59 @@ positivity violation where comparison is structurally impossible.}
   But averages hide structure---HR = 0.55 does not reveal
   \textasciitilde3.5-fold variation
 \item
-  Positivity violation is information---the gray zone reflects clinical
-  logic
+  Positivity violation is structural---the gray zone reflects clinical
+  logic where \(\Phi_a(x)\) is undefined
 \item
   Field-based output is a map, not a number
 \end{enumerate}
+
+\section{Estimation Details
+(Practical)}\label{estimation-details-practical}
+
+\begin{itemize}
+\tightlist
+\item
+  Model class: Flexible regressors for \(\log\lambda(x,a,t)\) (e.g.,
+  GAMs with additive smooths and selected interactions: \texttt{s(x\_j)}
+  and \texttt{ti(x\_j,x\_k)}) fitted separately by \(a\) or jointly with
+  interaction terms.
+\item
+  Smoothing: Choose basis size \(k\) via REML or cross-validation;
+  prefer lower-order interactions to mitigate the curse of
+  dimensionality. For \(p\gg 2\), use (i) additive structures with
+  sparse interactions, (ii) dimension reduction (PCA/PLS on \(X\)), or
+  (iii) prior feature screening to stabilize surface estimation.
+\item
+  Variance: Obtain uncertainty via nonparametric bootstrap over
+  individuals and refit surfaces; propagate to \(\Delta_A\Phi(x)\)
+  pointwise. For GAMs, extract covariance of smooths for delta-method
+  approximations where feasible.
+\item
+  Sample size: For dense 2D surfaces (\(k\approx 15\) per axis),
+  \(N\geq \mathcal{O}(10^3)\) is typically needed for stable maps;
+  higher dimensions require additive structures and stronger
+  regularization.
+\item
+  Reporting: Restrict visualization to regions with empirical support
+  for both \(a=0,1\); mask others and report as structural boundaries.
+\item
+  Boundary detection: (i) define common support as
+  \(\{x: n(a=0|x)\geq m \text{ and } n(a=1|x)\geq m\}\) or via
+  propensity score trimming
+  \(\hat{e}(x)\in[\varepsilon, 1-\varepsilon]\); (ii) mask non-supported
+  regions (NA) and render as gray in visualizations; (iii) report
+  sensitivity to the threshold \(\varepsilon\) or minimum count \(m\).
+\end{itemize}
+
+\section{Dynamics and the Transition
+Kernel}\label{dynamics-and-the-transition-kernel}
+
+For time-varying treatment, write
+\(P(X_{t+1}\mid X_t, A_t=a)=K_a(X_t,X_{t+1})\). Policy constraints
+appear as zeros of \(K_a\). Regime contrasts over horizons can be
+summarized by integrating hazards along admissible trajectories
+(discrete-time g-formula) and visualized as time-indexed fields
+\(\Phi_{a,t}(x)\).
 
 \section{Relation to Existing Heterogeneity
 Research}\label{relation-to-existing-heterogeneity-research}
@@ -639,24 +696,31 @@ Epidynamix
 \endlastfoot
 Core question & ``What is the effect for subgroup \(X=x\)?'' & ``What is
 the structure of the risk field?'' \\
-Output & \(\tau(x) = \mathbb{E}[Y(1) - Y(0) \mid X=x]\) & \(\Phi(s)\),
-\(\nabla \Phi\), structural boundaries \\
+Output & \(\tau(x) = \mathbb{E}[Y(1) - Y(0) \mid X=x]\) &
+\(\Delta_A\Phi(x)\), structural boundaries \\
 Positivity violation & Estimation problem (trim, extrapolate) &
 \textbf{Information} (map the boundary) \\
-Counterfactuals & Required & Not required \\
-Goal & Better effect estimation & Different question entirely \\
+Counterfactuals & Explicit potential outcomes & Same logic, different
+framing \\
+Goal & Better effect estimation & Richer output format \\
 \end{longtable}
 
-\textbf{Key distinction:} CATE still asks ``what is the effect?''---just
-conditional on \(X\) (Wager and Athey 2018). Epidynamix asks ``what does
-the risk landscape look like, and where can we not go?'' Crucially, CATE
-treats positivity violations as missing data; Epidynamix reports
-boundaries explicitly as part of the result.
+\textbf{Mathematical equivalence:} For survival outcomes,
+\(\Delta_A\Phi(x) = \log\{\lambda(x,0)/\lambda(x,1)\}\) is
+mathematically equivalent to CATE on the log-hazard scale. We do not
+claim a new estimand.
+
+\textbf{Key distinction:} The difference is in output format and
+interpretation of failures. CATE treats positivity violations as missing
+data to be handled (trimming, extrapolation); Epidynamix reports these
+boundaries explicitly as structural features of the clinical landscape.
+Both require exchangeability; the field framing simply elevates
+heterogeneity and boundaries from nuisance to primary output.
 
 \subsection{Connection to Structural Nested
 Models}\label{connection-to-structural-nested-models}
 
-The local effect \(\delta_A \Phi(x)\) shares conceptual ground with the
+The local effect \(\Delta_A \Phi(x)\) shares conceptual ground with the
 ``blip function'' in Structural Nested Mean Models (Robins 1994), which
 also models treatment effects as functions of patient state. The key
 difference is interpretive: SNMM aims to estimate causal effects under
@@ -665,18 +729,30 @@ as a geometric object to be mapped.
 
 \subsection{Novelty Claim}\label{novelty-claim}
 
-We do not claim to invent new mathematics. Potential landscapes exist in
-physics and systems biology (e.g., Waddington's epigenetic landscape
-(Waddington 1957)). Concurrent work by Leizerman (Leizerman 2025)
-develops a ``Unified Causal Field Theory'' using differential geometry
-and fiber bundles---a more general mathematical formalization applicable
-across domains. Our contribution is complementary: applying this
-geometric lens specifically to clinical RWD, where positivity violations
-are common, effects are entangled with state, and the average-effect
-question may be structurally unanswerable.
+We do not claim new mathematics or a new estimand. \(\Delta_A\Phi(x)\)
+is CATE on a transformed scale. Potential landscapes exist in physics
+and systems biology (e.g., Waddington's epigenetic landscape (Waddington
+1957)). Concurrent work by Leizerman (Leizerman 2025) develops a
+``Unified Causal Field Theory'' using differential geometry---a more
+general formalization.
 
-This is a \textbf{reinterpretation}, not an invention---a new language
-for an old problem.
+Our contribution is practical and interpretive:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Output format:} Report the effect surface, not just its
+  average
+\item
+  \textbf{Boundary elevation:} Treat positivity violations as structural
+  findings, not nuisance
+\item
+  \textbf{Clinical RWD focus:} Where guidelines create structural zeros,
+  mapping boundaries may be more informative than forcing estimation
+\end{enumerate}
+
+This is a \textbf{reframing of output}, not a methodological invention.
 
 \section{Discussion}\label{discussion}
 
@@ -707,27 +783,30 @@ map rather than a number.
 \item
   Consider whether the causal question is answerable before estimating
 \item
-  Report HR field maps (\(\exp\{-\delta_A \Phi\}\)) alongside scalar
+  Report HR field maps (\(\exp\{-\Delta_A \Phi\}\)) alongside scalar
   summaries
 \end{enumerate}
 
 \textbf{Limitations:} The framework is conceptual; practical estimation
-of \(\Phi(s)\) requires flexible models (e.g., GAMs, neural networks)
+of \(\Phi_a(x)\) requires flexible models (e.g., GAMs, neural networks)
 and careful validation. Extension to time-varying treatments and
 high-dimensional states remains an open challenge.
 
 \section{Conclusion}\label{conclusion}
 
-Newtonian mechanics is not wrong---it is flat-space physics. Causal
-inference is not false---it is a low-curvature approximation.
+Standard causal inference methods are not wrong---they provide valid
+average effect estimates under their assumptions. However, when effects
+are highly heterogeneous or structural constraints create positivity
+violations, a scalar summary may be insufficient.
 
-Real-world epidemiology, with its structural constraints and
-heterogeneous effects, may require a geometric view. The Epidynamix
-framework offers one such lens: treating causal effects not as forces,
-but as directional movements within a structured risk field.
+The Epidynamix framework offers a complementary output format: mapping
+the treatment effect surface \(\Delta_A\Phi(x)\) and explicitly
+reporting regions where causal comparisons are structurally impossible.
+This is not a new estimand but a richer way to present heterogeneity and
+structural boundaries.
 
-When the standard causal question cannot be answered, perhaps we should
-ask a different question.
+When averages hide important structure, consider reporting the map
+alongside the number.
 
 \section{References}\label{references}
 
@@ -768,12 +847,6 @@ Psychology} 66 (5): 688.
 Waddington, Conrad Hal. 1957. \emph{The Strategy of the Genes: A
 Discussion of Some Aspects of Theoretical Biology}. London: George Allen
 \& Unwin.
-
-\bibitem[\citeproctext]{ref-wager2018}
-Wager, Stefan, and Susan Athey. 2018. {``Estimation and Inference of
-Heterogeneous Treatment Effects Using Random Forests.''} \emph{Journal
-of the American Statistical Association} 113 (523): 1228--42.
-\url{https://doi.org/10.1080/01621459.2017.1319839}.
 
 \end{CSLReferences}
 

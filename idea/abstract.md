@@ -8,7 +8,7 @@ output:
 
 > **Core message**  
 > Causal effects are not forces.  
-> They are directional derivatives of a risk potential field.
+> They are directional gradients in covariate space and finite differences across treatment regimes.
 
 ---
 
@@ -61,21 +61,20 @@ We propose an analogous shift:
 
 ## Notation
 
-Throughout this paper, we use the following conventions:
+Throughout, we adopt a discrete-treatment convention:
 
 | Symbol | Meaning |
 |--------|---------|
-| $S_t = (X_t, A_t)$ | System state at time $t$ |
-| $\mathcal{S}$ | State space |
-| $\lambda(s)$ | Instantaneous hazard at state $s$ |
-| $\Phi(s)$ | Risk potential function |
-| $\nabla \Phi$ | Gradient (for continuous variables) |
-| $\delta_A \Phi(x)$ | Finite difference for binary $A$: $\Phi(x,1) - \Phi(x,0)$ |
-| $K(s, s')$ | Transition kernel |
-| $\mathcal{I}_a$ | Intervention operator |
+| $S_t = X_t$ | System state (covariates) at time $t$ |
+| $\mathcal{S}$ | State space for $X$ |
+| $\lambda(x,a,t)$ | Instantaneous hazard at $x$ under $a$ at time $t$ |
+| $\Phi_a(x)$ | Risk potential under regime $a\in\{0,1\}$ (landmark or cumulative) |
+| $\nabla_x \Phi_a$ | Gradient w.r.t. covariates $x$ |
+| $\Delta_A \Phi(x)$ | $\Phi_1(x) - \Phi_0(x)$ (finite difference across $a$) |
+| $K_a(x_t,x_{t+1})$ | Transition kernel conditional on $a_t$ |
+| $\mathcal{I}_a$ | Intervention operator selecting regime/index $a$ |
 
-**Note on binary treatment:**
-When $A \in \{0, 1\}$, expressions like $\partial \Phi / \partial a$ should be understood as the finite difference $\delta_A \Phi$, not a true derivative.
+For binary $a$, we never take derivatives in $a$; we use finite differences $\Delta_A\Phi$.
 
 ---
 
@@ -83,21 +82,19 @@ When $A \in \{0, 1\}$, expressions like $\partial \Phi / \partial a$ should be u
 
 ### 3.1 State Definition
 
-We define the system state as:
+We model the state as covariates only:
 
 $$
-S_t = (X_t, A_t) \in \mathcal{S}
+S_t = X_t \in \mathcal{S}.
 $$
 
-where treatment $A_t$ is a coordinate of the system, not an external action.
-
-The system evolves according to a transition kernel:
+Treatment acts as a regime index. Covariate dynamics can depend on treatment via
 
 $$
-P(S_{t+1} \mid S_t) = K(S_t, S_{t+1})
+P(X_{t+1}\mid X_t, A_t=a)=K_a(X_t,X_{t+1}).
 $$
 
-Regions where $K$ assigns zero probability are **structural**, not violations.
+Regions where $K_a$ assigns zero probability are **structural**, not violations.
 
 ---
 
@@ -118,10 +115,10 @@ This is estimable using standard survival models.
 
 ### 4.2 Potential Function
 
-Define a risk potential:
+Define a risk potential either at a landmark time $t^*$ or cumulatively:
 
 $$
-\Phi(s) = -\log \lambda(s)
+\Phi_a(x) = -\log \lambda(x,a,t^*)\quad\text{or}\quad \Phi_a(x) = -\log \int_0^\tau \lambda(x,a,t)\,dt.
 $$
 
 Interpretation:
@@ -135,18 +132,7 @@ It is a **geometric property of the state space**.
 
 ### 4.3 Time Treatment
 
-**Simplifying assumption:** In this framework, we treat $\Phi(s)$ as either:
-
-1. **Landmark approach:** Evaluated at a fixed reference time $t^*$
-   $$\Phi(s) := \Phi(s; t^*)$$
-
-2. **Stationary assumption:** Time-invariant for a given state
-   $$\Phi(s) = \Phi(s) \quad \text{(no explicit } t \text{ dependence)}$$
-
-3. **Cumulative formulation:** Integrated over a horizon $[0, \tau]$
-   $$\Phi(s) = -\log \Lambda(s) = -\log \int_0^\tau \lambda(s, u) \, du$$
-
-For the toy examples in this paper, we adopt the **stationary assumption** for simplicity. Extension to fully time-varying fields is discussed in Section 12.
+RWD hazards are time-varying. We recommend: (1) landmark fields $\Phi_a(x; t^*)$ at clinically meaningful $t^*$; or (2) discrete-time fields $\Phi_{a,t}(x)$ on $t\in\{1,\dots,T\}$; or (3) cumulative $\Phi_a(x)$ over $[0,\tau]$. Toy examples use (1) for simplicity.
 
 ---
 
@@ -155,13 +141,13 @@ For the toy examples in this paper, we adopt the **stationary assumption** for s
 Consider system evolution:
 
 $$
-S_{t+1} = \mathcal{F}(S_t)
+X_{t+1} = \mathcal{F}(X_t)
 $$
 
-In many RWD systems, events occur preferentially along trajectories where:
+For a fixed regime $a$, events occur preferentially along trajectories where:
 
 $$
-\mathbb{E}[\Phi(S_{t+1}) \mid S_t = s] \le \Phi(s)
+\mathbb{E}[\Phi_a(X_{t+1}) \mid X_t = x] \le \Phi_a(x)
 $$
 
 Thus, $\Phi$ behaves as a **stochastic Lyapunov-like function**:
@@ -170,7 +156,7 @@ Thus, $\Phi$ behaves as a **stochastic Lyapunov-like function**:
 
 ---
 
-## 6. Intervention as a Transition Operator
+## 6. Intervention as Regime Selection
 
 Instead of a do-operator:
 
@@ -178,15 +164,14 @@ $$
 \text{do}(A=a)
 $$
 
-we define intervention as a state transformation:
+we view intervention as **regime selection**—choosing which potential surface to evaluate:
 
 $$
-\mathcal{I}_a : \mathcal{S} \to \mathcal{S}, \quad
-\mathcal{I}_a(x,a') = (x,a)
+\mathcal{I}_a: x \mapsto \Phi_a(x)
 $$
 
-Interventions move the system across the field.  
-They do not directly generate outcomes.
+Intervention selects the regime index $a$, evaluating $\Phi_a(x)$ at the current state.
+It does not transform the state itself.
 
 ---
 
@@ -194,18 +179,13 @@ They do not directly generate outcomes.
 
 ### 7.1 Gradient of the Potential (Risk Vector Field)
 
-$\Phi$ defines a scalar field on $\mathcal{S}$.  
-Its gradient defines a **vector field**:
+Each $\Phi_a(x)$ defines a scalar field on $\mathcal{S}$. Its spatial gradient defines a **vector field**:
 
 $$
-\nabla \Phi(s) =
-\left(
-\frac{\partial \Phi}{\partial x_1},
-\ldots,
-\frac{\partial \Phi}{\partial x_p},
-\frac{\partial \Phi}{\partial a}
-\right)
+\nabla_x \Phi_a(x) = \left(\tfrac{\partial \Phi_a}{\partial x_1},\ldots,\tfrac{\partial \Phi_a}{\partial x_p}\right).
 $$
+
+Across treatment, use the finite difference $\Delta_A\Phi(x)=\Phi_1(x)-\Phi_0(x)$.
 
 This **risk-gradient field** encodes:
 - directions of maximal risk increase
@@ -219,7 +199,7 @@ independent of baseline hazard $h_0$). The field framework generalizes this to n
 
 ### 7.2 Directional Effects as Local Geometry
 
-An intervention induces a local displacement:
+**For continuous treatment** (e.g., dose), an intervention induces a local displacement:
 
 $$
 \Delta s = (0,\ldots,0,\Delta a)
@@ -231,6 +211,12 @@ $$
 \Delta \Phi
 \approx
 \nabla \Phi(s) \cdot \Delta s
+$$
+
+**For discrete (binary) treatment**, use the finite difference directly:
+
+$$
+\Delta_A \Phi(x) = \Phi_1(x) - \Phi_0(x)
 $$
 
 Definitions:
@@ -246,9 +232,9 @@ They are **not global scalar quantities**.
 
 ---
 
-## 8. ATE as a First-Order Taylor Projection
+## 8. ATE as a First-Order Projection
 
-The true object is the field $\Phi(x,a)$.
+The primary objects are the regime-specific fields $\Phi_a(x)$ and their contrast $\Delta_A\Phi(x)$.
 
 **For continuous treatment**, a first-order Taylor expansion in $a$ gives:
 
@@ -260,19 +246,15 @@ $$
 \frac{\partial \Phi(x,a)}{\partial a}\Big|_{a=0}
 $$
 
-**For binary treatment** $A \in \{0,1\}$, this reduces to the finite difference
-(see Notation section):
-
-$$
-\Phi(x,1) - \Phi(x,0) = \delta_A \Phi(x)
-$$
+**For binary treatment** $A \in \{0,1\}$, the effect surface is the finite difference
+$\Delta_A\Phi(x)=\Phi_1(x)-\Phi_0(x)$.
 
 Averaging over $X$ yields the ATE:
 
 $$
 \text{ATE} = \mathbb{E}_X
 \left[\Phi(X,1) - \Phi(X,0)\right]
-= \mathbb{E}_X[\delta_A \Phi(X)]
+= \mathbb{E}_X[\Delta_A \Phi(X)]
 $$
 
 **ATE is a first-order projection of a high-dimensional geometry.**
@@ -393,8 +375,8 @@ scalar causal summaries collapse complex geometry into unstable averages.
 ### 10.6 Mathematical Formalization: ATE as a Special Case
 
 **Theorem (Informal):** The Average Treatment Effect (ATE) is an
-information-preserving summary of the field $\Phi(x, a)$ when effect
-heterogeneity is negligible, i.e., $\text{Var}_X[\delta_A \Phi] \approx 0$.
+information-preserving summary of the field $\Phi_a(x)$ when effect
+heterogeneity is negligible, i.e., $\text{Var}_X[\Delta_A \Phi] \approx 0$.
 
 **Proof sketch:**
 
@@ -403,35 +385,35 @@ heterogeneity is negligible, i.e., $\text{Var}_X[\delta_A \Phi] \approx 0$.
 The treatment effect is exactly the finite difference:
 
 $$
-\delta_A \Phi(x) = \Phi(x, 1) - \Phi(x, 0)
+\Delta_A \Phi(x) = \Phi_1(x) - \Phi_0(x)
 $$
 
 No Taylor expansion is needed. "Curvature" in this context refers to
-**heterogeneity across $x$**, i.e., how much $\delta_A \Phi(x)$ varies with $x$.
+**heterogeneity across $x$**, i.e., how much $\Delta_A \Phi(x)$ varies with $x$.
 
 **For continuous/dose treatment** $A \in [0, 1]$:
 
 We can write the effect as an integral:
 
 $$
-\Phi(x, 1) - \Phi(x, 0) = \int_0^1 \frac{\partial \Phi}{\partial a}(x, a) \, da
+\Phi_1(x) - \Phi_0(x) = \int_0^1 \frac{\partial \Phi_a}{\partial a}(x, a) \, da
 $$
 
 Or via second-order Taylor expansion around $a = 0$:
 
 $$
-\Phi(x, 1) \approx \Phi(x, 0) + \frac{\partial \Phi}{\partial a}\Big|_{a=0} + \frac{1}{2} \frac{\partial^2 \Phi}{\partial a^2}\Big|_{a=\xi}
+\Phi_1(x) \approx \Phi_0(x) + \frac{\partial \Phi_a}{\partial a}\Big|_{a=0} + \frac{1}{2} \frac{\partial^2 \Phi_a}{\partial a^2}\Big|_{a=\xi}
 $$
 
-where $\xi \in (0, 1)$. The curvature term $\frac{\partial^2 \Phi}{\partial a^2}$
+where $\xi \in (0, 1)$. The curvature term $\frac{\partial^2 \Phi_a}{\partial a^2}$
 captures dose-response nonlinearity.
 
-**Case 1: Homogeneous effects ($\text{Var}_X[\delta_A \Phi] \approx 0$)**
+**Case 1: Homogeneous effects ($\text{Var}_X[\Delta_A \Phi] \approx 0$)**
 
-For binary treatment, $\text{ATE} = \mathbb{E}_X[\delta_A \Phi(X)]$ holds by definition.
+For binary treatment, $\text{ATE} = \mathbb{E}_X[\Delta_A \Phi(X)]$ holds by definition.
 The question is whether this average is **informative**.
 
-When $\delta_A \Phi(x) \approx c$ (constant across $x$):
+When $\Delta_A \Phi(x) \approx c$ (constant across $x$):
 
 $$
 \text{ATE} \approx c
@@ -440,14 +422,14 @@ $$
 ATE is a complete summary—no information is lost.
 
 For continuous treatment, this additionally requires low dose-response
-curvature ($\partial^2 \Phi / \partial a^2 \approx 0$).
+curvature ($\partial^2 \Phi_a / \partial a^2 \approx 0$).
 
-**Case 2: Heterogeneous effects ($\text{Var}_X[\delta_A \Phi]$ large)**
+**Case 2: Heterogeneous effects ($\text{Var}_X[\Delta_A \Phi]$ large)**
 
 ATE remains well-defined:
 
 $$
-\text{ATE} = \mathbb{E}_X[\delta_A \Phi(X)]
+\text{ATE} = \mathbb{E}_X[\Delta_A \Phi(X)]
 $$
 
 But it collapses a distribution into a single number, losing information about:
@@ -457,16 +439,16 @@ But it collapses a distribution into a single number, losing information about:
 
 **Case 3: Positivity violation (structural discontinuity)**
 
-When $P(A = 0 \mid X = x) = 0$ for some $x$, the field $\Phi(x, 0)$ is
+When $P(A = 0 \mid X = x) = 0$ for some $x$, the field $\Phi_0(x)$ is
 **undefined or inaccessible** in that region.
 
 Attempting to compute:
 
 $$
-\text{ATE} = \mathbb{E}[\Phi(X, 0) - \Phi(X, 1)]
+\text{ATE} = \mathbb{E}[\Phi_0(X) - \Phi_1(X)]
 $$
 
-involves integration over regions where $\Phi(x, 0)$ does not exist.
+involves integration over regions where $\Phi_0(x)$ does not exist.
 This is not an estimation problem—it is a **domain problem**.
 
 One may redefine the estimand on the overlap region (where positivity holds);
@@ -501,7 +483,7 @@ fail, and what structural information is discarded.
 
 ## 11. Implications
 
-- Counterfactual existence is not required
+- Potential-outcome notation is optional; identification still relies on exchangeability and positivity on the target domain
 - Positivity violations become structural information
 - Observer feedback can be embedded in $K(s,s')$
 - Effects are directional, not scalar
@@ -519,9 +501,9 @@ One might ask: *what does the Epidynamix framework add?*
 | Aspect | CATE / HTE Research | Epidynamix |
 |--------|---------------------|------------|
 | Core question | "What is the effect for subgroup $X=x$?" | "What is the structure of the risk field?" |
-| Output | $\tau(x) = \mathbb{E}[Y(1) - Y(0) \mid X=x]$ | $\Phi(s)$, $\nabla \Phi$, structural boundaries |
+| Output | $\tau(x) = \mathbb{E}[Y(1) - Y(0) \mid X=x]$ | $\Phi_a(x)$, $\Delta_A\Phi(x)$, boundaries |
 | Positivity violation | Estimation problem (trim, extrapolate) | **Information** (map the boundary) |
-| Counterfactuals | Required | Not required |
+| Counterfactuals | Required | Optional notation; assumptions still required |
 | Goal | Better effect estimation | Different question entirely |
 
 **Key distinction:** CATE still asks "what is the effect?"—just conditional on $X$.
@@ -559,18 +541,11 @@ It is a low-curvature approximation.
 
 # Appendix
 
-## A1. ATE as Directional Derivative
+## A1. ATE as a Regime Contrast
 
 $$
-\text{ATE}
-\approx
-\mathbb{E}_S
-\left[
-\nabla \Phi(S) \cdot \mathbf{e}_A
-\right]
+\text{ATE} = \mathbb{E}_X\big[\Delta_A\Phi(X)\big] = \mathbb{E}_X\big[\Phi_1(X)-\Phi_0(X)\big].
 $$
-
-where $\mathbf{e}_A$ is the unit vector along the treatment coordinate.
 
 ---
 
@@ -615,15 +590,15 @@ We simulate a 2D state space with survival outcomes:
 - $T$: Survival time (exponentially distributed based on hazard)
 
 **Time treatment:** We adopt the **stationary assumption** (Section 4.3),
-treating $\Phi(s)$ as time-invariant for simplicity.
+treating $\Phi_a(x)$ as time-invariant for simplicity.
 
 **Structural constraint:** If $X_1 > 160$, then $A = 1$ (mandatory treatment per clinical guideline).
 
 **Heterogeneous effect:** Treatment benefit increases with $X_1$.
 
 **Connection to Cox model:** In the Cox framework, $\log \lambda(s) = \log h_0(t) + \beta' s$,
-so $\nabla_x \Phi = -\beta$ (independent of $h_0(t)$, for continuous covariates).
-Our GAM-based estimation generalizes this to nonlinear $\Phi(s)$.
+so $\nabla_x \Phi_a = -\beta$ (independent of $h_0(t)$, for continuous covariates).
+Our GAM-based estimation generalizes this to nonlinear $\Phi_a(x)$.
 
 ### Results (N = 3000)
 
@@ -640,7 +615,7 @@ Both methods produce a single number summarizing "the effect."
 
 | Output | Value | Interpretation |
 |--------|-------|----------------|
-| $\delta_A \Phi$ range | 0.42 – 1.66 | Effect varies 4-fold across state space |
+| $\Delta_A \Phi$ range | 0.42 – 1.66 | Effect varies 4-fold across state space |
 | Gradient direction | Increasing with $X_1$ | Higher BP → larger treatment benefit |
 | Structural boundary | $X_1 > 160$ (gray region) | Comparison impossible; all patients treated |
 

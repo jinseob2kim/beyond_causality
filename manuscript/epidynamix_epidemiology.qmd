@@ -39,13 +39,13 @@ While this works in the frictionless vacuum of a Randomized Controlled Trial (RC
 We propose a fundamental shift in our worldview: **Causal effects are not primitive forces; they are movements within a structured Field.** We call this framework **Epidynamix**.
 
 ## The Risk Potential Field ($\Phi$)
-We define a scalar field over the state space $\mathcal{S}$ of all possible patient conditions. We call this the **Risk Potential ($\Phi$)**:
-$$ \Phi(s) = -\log(\lambda(s)) $$
-where $\lambda(s)$ is the instantaneous hazard at state $s$. In this field, "safety" is high ground (peaks), and "danger" is low ground (valleys).
+We define a scalar field over the state space $\mathcal{S}$ of all possible patient conditions. We call this the **Risk Potential ($\Phi_a$)**:
+$$ \Phi_a(x) = -\log\lambda(x,a) $$
+where $\lambda(x,a)$ is the instantaneous hazard at state $x$ under regime $a$. In this field, "safety" is high ground (peaks), and "danger" is low ground (valleys).
 
-## Intervention as a State-Transition Operator
-An intervention is not a force applied to a static object. Instead, it is an operator ($\mathcal{I}_a$) that moves a patient from one coordinate in the state space to another. The "effect" of the treatment is the difference in the local potential and its gradient at the new position:
-$$ \text{Effect} = \Phi(x, A=1) - \Phi(x, A=0) $$
+## Intervention as Regime Selection
+An intervention is not a force applied to a static object. Instead, it is an operator ($\mathcal{I}_a$) that selects which potential surface to evaluate at the current state. The "effect" of the treatment is the finite difference between regimes:
+$$ \Delta_A \Phi(x) = \Phi_1(x) - \Phi_0(x) $$
 
 # Positivity Violations are Structural Cliffs
 
@@ -72,7 +72,7 @@ Treatment benefit was designed to increase with $X_1$ (heterogeneous effect).
 |--------|--------|----------------|
 | Cox HR | 0.55 | "Treatment reduces hazard by 45%" |
 | IPTW ATE | 0.20 | "Treatment increases 1-year survival by 20%p" |
-| Field $\delta_A \Phi$ | 0.42 – 1.66 | Effect varies 4-fold across state space |
+| Field $\Delta_A \Phi$ | 0.42 – 1.66 | Effect varies 4-fold across state space |
 
 Traditional methods produce single numbers. The Field approach reveals that treatment benefit is **4-fold larger** for high-BP patients—precisely those for whom the guideline mandates treatment. The gray zone ($X_1 > 160$) is not a failure; it is a Structural Cliff.
 
@@ -86,8 +86,8 @@ Conditional Average Treatment Effect (CATE) estimation—via causal forests, met
 |--------|------|------------|
 | Question | "What is the effect for subgroup X=x?" | "What is the structure of the risk landscape?" |
 | Positivity | Estimation problem to fix | Structural information to map |
-| Counterfactuals | Required | Not required in boundary regions |
-| Output | $\tau(x)$ (conditional effect) | $\Phi(s)$, gradients, and boundaries |
+| Counterfactuals | Required | Optional notation; assumptions still required |
+| Output | $\tau(x)$ (conditional effect) | $\Phi_a(x)$, gradients, and boundaries |
 
 CATE asks "what is the effect?"—conditional on covariates. Epidynamix asks "what does the landscape look like, and where can we not go?"
 

@@ -82,45 +82,45 @@ $$
 A \longrightarrow Y
 $$
 
-we view treatment as a **state transition operator** within a structured risk field:
+we view treatment as **regime selection**—choosing which potential surface to evaluate:
 
 $$
-\mathcal{I}_a: s \mapsto s', \quad \Delta\Phi = \Phi(s') - \Phi(s)
+\mathcal{I}_a: x \mapsto \Phi_a(x)
 $$
 
-where $\Phi(s) = -\log \lambda(s)$ is the **risk potential**—higher $\Phi$ means
-lower instantaneous hazard, i.e., relative safety.
+where $\Phi_a(x) = -\log \lambda(x,a)$ is the **risk potential** under regime $a$. Higher $\Phi_a$ means lower instantaneous hazard, i.e., relative safety.
 
 
 ### ATE as First-Order Approximation
 
-The treatment effect at state $s$ is the finite difference:
+Let $\Phi_a(x)$ denote the risk potential under regime $a\in\{0,1\}$. The effect surface is the finite difference:
 
 $$
-\delta_A \Phi(x) = \Phi(x, 1) - \Phi(x, 0)
+\Delta_A \Phi(x) = \Phi_1(x) - \Phi_0(x).
 $$
 
-The ATE is simply the average of this local effect:
+The ATE is the average of this local contrast:
 
 $$
-\text{ATE} = \mathbb{E}_X[\delta_A \Phi(X)]
+\text{ATE} = \mathbb{E}_X[\Delta_A \Phi(X)].
 $$
 
-This average is **information-preserving** only when $\text{Var}_X[\delta_A \Phi] \approx 0$
+This average is **information-preserving** only when $\text{Var}_X[\Delta_A \Phi] \approx 0$
 (homogeneous effects). When effects vary across patient states, the ATE collapses
 a rich distribution into a single number.
 
 
-### Positivity as Structural Geometry
+### Identification and Positivity
 
 Standard positivity requires $0 < P(A=1 \mid X=x) < 1$ for all $x$. When this
 fails—say, when clinical guidelines mandate treatment above a threshold—we face
 a region where the counterfactual $Y(0)$ does not exist.
 
-In the field framework, this is not a statistical problem. It is a **structural
-boundary**: a "cliff" in the risk landscape where certain states are inaccessible.
-Rather than trimming data to force positivity, we map these boundaries as features
-of the system.
+We do not avoid counterfactual reasoning; we avoid unnecessary notation. Estimation of $\Phi_a(x)$ and $\Delta_A\Phi(x)$ relies on exchangeability and positivity on the target domain. When $P(A=a\mid X=x)=0$, $\Phi_a(x)$ is undefined. In the field framework, such regions are **structural boundaries**: "cliffs" in the landscape where comparison is not possible. We map these boundaries rather than extrapolate across them.
+
+### Notation and Time Treatment
+
+We model the state as $S_t=X_t\in\mathcal{S}$ and index regimes by $a$. Hazards are time-varying, so we either (i) define landmark fields $\Phi_a(x;t^*)$ at a chosen $t^*$, (ii) construct discrete-time fields $\Phi_{a,t}(x)$, or (iii) use cumulative potentials over $[0,\tau]$.
 
 
 ## Illustrative Simulation
@@ -140,7 +140,7 @@ Treatment benefit was designed to increase with $X_1$ (heterogeneous effect).
 |--------|--------|----------------|
 | Cox HR | 0.55 | "Treatment reduces hazard by 45%" |
 | IPTW ATE | 0.20 | "Treatment increases 1-year survival by 20%p" |
-| Field $\delta_A \Phi$ | 0.42 – 1.66 | Effect varies 4-fold across state space |
+| Field $\Delta_A \Phi$ | 0.42 – 1.66 | Effect varies 4-fold across state space |
 
 Traditional methods produce single numbers. The field approach reveals that
 treatment benefit is **4-fold larger** for high-BP patients—precisely those
@@ -161,9 +161,9 @@ is in the **question asked**:
 | Aspect | CATE | Epidynamix |
 |--------|------|------------|
 | Question | "What is the effect for subgroup X=x?" | "What is the structure of the risk field?" |
-| Positivity | Estimation problem | Information |
-| Counterfactuals | Required | Not required |
-| Output | $\tau(x)$ (conditional effect) | $\Phi(s)$, gradients, boundaries |
+| Positivity | Estimation problem | Information (boundary mapping) |
+| Counterfactuals | Required | Optional notation; assumptions still required |
+| Output | $\tau(x)$ (conditional effect) | $\Phi_a(x)$, $\Delta_A\Phi(x)$, boundaries |
 
 CATE asks "what is the effect?"—conditional on covariates. Epidynamix asks
 "what does the landscape look like, and where can we not go?"
@@ -201,7 +201,7 @@ approach provides richer output—a map rather than a number.
 3. Treat positivity violations as findings, not errors
 4. Consider whether the causal question is answerable before estimating
 
-**Limitations:** The framework is conceptual; practical estimation of $\Phi(s)$
+**Limitations:** The framework is conceptual; practical estimation of $\Phi_a(x)$
 requires flexible models (e.g., GAMs, neural networks) and careful validation.
 Extension to time-varying treatments and high-dimensional states remains an
 open challenge.
